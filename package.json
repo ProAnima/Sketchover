@@ -1,7 +1,26 @@
 {
   "name": "sketchover",
   "version": "0.1.0",
-  "description": "Прозрачный холст для рисования поверх всех окон: кисть, стрелки, блоки с текстом, лазерная указка.",
+  "description": "Draw on your screen during calls: brush, arrows, Markdown text blocks, region screenshots, laser pointer, click-through. Free screen annotation for Windows, macOS and Linux.",
+  "keywords": [
+    "screen-annotation",
+    "draw-on-screen",
+    "screen-overlay",
+    "annotation-tool",
+    "presentation-tool",
+    "whiteboard",
+    "screen-marker",
+    "epic-pen-alternative",
+    "zoomit-alternative",
+    "tauri"
+  ],
+  "homepage": "https://github.com/ProAnima/Sketchover",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ProAnima/Sketchover.git"
+  },
+  "license": "Apache-2.0",
+  "author": "ProAnimaStudio (Ian Panaev)",
   "private": true,
   "scripts": {
     "start": "tauri dev",
