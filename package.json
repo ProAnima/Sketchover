@@ -1,13 +1,14 @@
 {
   "name": "sketchover",
   "version": "0.1.0",
-  "description": "Прозрачный оверлей для рисования поверх всех окон: фигуры, стрелки, ноды, лазерная указка.",
-  "main": "src/main.js",
+  "description": "Прозрачный холст для рисования поверх всех окон: кисть, стрелки, блоки с текстом, лазерная указка.",
   "private": true,
   "scripts": {
-    "start": "electron ."
+    "start": "tauri dev",
+    "build": "tauri build",
+    "tauri": "tauri"
   },
   "devDependencies": {
-    "electron": "^33.0.0"
+    "@tauri-apps/cli": "^2"
   }
 }
