@@ -21,12 +21,21 @@
         "https://hub.proanima.net/v1/sketchover/update/{{target}}/{{arch}}/{{current_version}}",
         "https://github.com/ProAnima/Sketchover/releases/latest/download/latest.json"
       ],
-      "windows": { "installMode": "passive" }
+      "windows": {
+        "installMode": "passive"
+      }
     }
   },
   "bundle": {
     "active": true,
-    "targets": ["nsis", "dmg", "appimage", "deb"],
+    "targets": [
+      "nsis",
+      "dmg",
+      "app",
+      "appimage",
+      "deb",
+      "rpm"
+    ],
     "publisher": "ProAnimaStudio",
     "homepage": "https://github.com/ProAnima/Sketchover",
     "copyright": "Copyright (c) 2026 ProAnimaStudio",
@@ -43,8 +52,40 @@
     "windows": {
       "nsis": {
         "installMode": "currentUser",
-        "languages": ["English", "Russian", "Spanish", "French", "German", "PortugueseBR", "SimpChinese", "Japanese", "Korean", "Arabic"],
-        "displayLanguageSelector": true
+        "installerIcon": "icons/icon.ico",
+        "languages": [
+          "English",
+          "Russian",
+          "Spanish",
+          "French",
+          "German",
+          "PortugueseBR",
+          "SimpChinese",
+          "Japanese",
+          "Korean",
+          "Arabic"
+        ],
+        "displayLanguageSelector": false
+      }
+    },
+    "macOS": {
+      "signingIdentity": "-",
+      "minimumSystemVersion": "11.0"
+    },
+    "linux": {
+      "deb": {
+        "depends": [
+          "libayatana-appindicator3-1",
+          "libpipewire-0.3-0",
+          "libxrandr2"
+        ]
+      },
+      "rpm": {
+        "depends": [
+          "libayatana-appindicator-gtk3",
+          "pipewire-libs",
+          "libXrandr"
+        ]
       }
     }
   }

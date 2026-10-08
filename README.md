@@ -4,6 +4,24 @@
 
 Tauri 2 (Rust) + чистый JS без сборки. Windows, macOS, Linux. Интерфейс на 11 языках, обновления через ProAnima Hub.
 
+## Установка
+
+Скачайте установщик для своей системы со страницы релизов: **Releases → последняя версия**.
+
+| Система | Файл | Как поставить |
+|---|---|---|
+| Windows 10/11 | `Sketchover_X.Y.Z_x64-setup.exe` | Запустить и нажать «Установить». Права администратора не нужны. |
+| macOS 11+ (Intel и Apple Silicon) | `Sketchover_X.Y.Z_universal.dmg` | Открыть и перетащить Sketchover в «Программы». |
+| Linux, любой дистрибутив | `Sketchover_X.Y.Z_amd64.AppImage` | Сделать исполняемым (`chmod +x`) и запустить. |
+| Ubuntu, Debian, Mint | `Sketchover_X.Y.Z_amd64.deb` | Двойной клик или `sudo apt install ./Sketchover_*.deb`. |
+| Fedora, openSUSE | `Sketchover-X.Y.Z-1.x86_64.rpm` | Двойной клик или `sudo dnf install ./Sketchover-*.rpm`. |
+
+После установки Sketchover сразу открывает холст и живёт в трее (на macOS — в строке меню). Дальше обновляется сам.
+
+**Первый запуск без подписи разработчика.** Пока у установщиков нет платной подписи:
+- Windows может показать «Система Windows защитила ваш компьютер» → «Подробнее» → «Выполнить в любом случае».
+- macOS может сказать, что разработчик не подтверждён → в Finder правый клик по Sketchover → «Открыть» → «Открыть». Для скриншотов macOS один раз попросит разрешение «Запись экрана».
+
 ## Запуск для разработки
 
 Нужны Node.js и Rust.
@@ -13,7 +31,7 @@ npm install
 npm start
 ```
 
-`npm run build` — установщики (NSIS, DMG, AppImage, DEB). Для релиза с файлами обновлений: `npm run tauri build -- --config src-tauri/tauri.updater.conf.json` с ключом подписи в `TAURI_SIGNING_PRIVATE_KEY`.
+`npm run build` — установщик для текущей системы (на Windows: `npm run build -- --bundles nsis`). Установщики для всех систем собирает CI — см. «Выпуск версии».
 
 ## Управление
 
@@ -38,6 +56,18 @@ npm start
 - Клавиши — по физическим цифрам, работают на любой раскладке.
 - В режиме «сквозные клики» и при зажатом `Alt` рисунок полупрозрачный, клики и прокрутка идут в окна под ним, панель остаётся кликабельной.
 - Холст открывается на мониторе, где курсор. Чтобы зрители видели рисунки, делись всем экраном, а не окном.
+
+## Выпуск версии
+
+```bash
+npm version patch
+```
+
+`npm version` (`patch`, `minor` или `major`) поднимает версию в `package.json` и `src-tauri/Cargo.toml`, коммитит и ставит тег `vX.Y.Z`. После `git push --follow-tags` GitHub Actions (`.github/workflows/release.yml`) проверяет код, собирает установщики для Windows, macOS и Linux, подписывает их для автообновления и кладёт в **черновик** релиза вместе с `latest.json`. Опубликовать черновик — вручную, после проверки; с публикацией версию видят ProAnima Hub и установленные приложения.
+
+Секреты репозитория: `TAURI_SIGNING_PRIVATE_KEY` и `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` — ключ подписи обновлений (публичная половина — в `src-tauri/tauri.conf.json`).
+
+Проверки локально: `npm run check` (интерфейс), `cargo clippy --all-targets -- -D warnings` и `cargo test` в `src-tauri/`.
 
 ## Структура
 
