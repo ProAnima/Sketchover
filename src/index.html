@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; script-src 'self'">
+  <title>Sketchover</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="mode-draw">
+  <canvas id="board"></canvas>
+  <textarea id="editor" hidden spellcheck="false"></textarea>
+  <div id="toolbar">
+    <span id="grip" title="Перетащить панель">⠿</span>
+    <div id="tools" class="group"></div>
+    <div id="colors" class="group"></div>
+    <div id="widths" class="group"></div>
+    <div class="group">
+      <button id="undo" title="Отменить (Ctrl+Z)">↶</button>
+      <button id="redo" title="Повторить (Ctrl+Y)">↷</button>
+      <button id="clear" title="Очистить всё (Ctrl+Alt+C)">🗑</button>
+    </div>
+    <button id="mode" title="Рисование / сквозные клики (Ctrl+Alt+D, Esc)"></button>
+    <button id="quit" title="Выйти">✕</button>
+  </div>
+  <script src="renderer.js"></script>
+</body>
+</html>

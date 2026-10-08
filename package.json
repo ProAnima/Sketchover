@@ -1,0 +1,13 @@
+{
+  "name": "sketchover",
+  "version": "0.1.0",
+  "description": "Прозрачный оверлей для рисования поверх всех окон: фигуры, стрелки, ноды, лазерная указка.",
+  "main": "src/main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^33.0.0"
+  }
+}
