@@ -2,28 +2,80 @@
 html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; font: 14px system-ui, sans-serif; user-select: none; }
 #board { position: fixed; inset: 0; width: 100%; height: 100%; }
 body.mode-draw #board { cursor: crosshair; }
+/* В сквозном режиме рисунок остаётся, но не мешает смотреть на окна под ним. */
+body.mode-pass #board, body.peek #board { opacity: .5; }
 body.mode-draw::after { content: ""; position: fixed; inset: 0; border: 3px solid rgba(255, 59, 48, .75); pointer-events: none; }
 
-#toolbar {
-  position: fixed; top: 12px; left: 50%; transform: translateX(-50%);
-  display: flex; align-items: center; gap: 10px; padding: 6px 10px;
-  background: rgba(24, 24, 28, .94); color: #eee; border-radius: 12px;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, .45); z-index: 10;
+#dock {
+  position: fixed; top: 12px; left: 50%; transform: translateX(-50%); z-index: 10;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
 }
+#toolbar, #settings {
+  background: rgba(24, 24, 28, .94); color: #eee; border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .45);
+}
+#toolbar { display: flex; align-items: center; gap: 10px; padding: 6px 10px; }
 #grip { cursor: grab; opacity: .6; padding: 0 2px; }
 .group { display: flex; align-items: center; gap: 3px; padding-right: 10px; border-right: 1px solid rgba(255, 255, 255, .15); }
-.group:last-of-type { border-right: 0; }
 button { all: unset; box-sizing: border-box; min-width: 30px; height: 30px; padding: 0 6px; display: grid; place-items: center; border-radius: 7px; cursor: pointer; font-size: 16px; color: #eee; }
 button:hover { background: rgba(255, 255, 255, .12); }
+button:focus-visible { outline: 2px solid #0a84ff; }
 button.active { background: #0a84ff; color: #fff; }
 button.swatch { min-width: 22px; width: 22px; height: 22px; padding: 0; border-radius: 50%; border: 2px solid transparent; }
 button.swatch.active { border-color: #fff; background-clip: padding-box; }
+button .icon, #help .icon { width: 17px; height: 17px; fill: currentColor; }
+#help .icon { width: 13px; height: 13px; }
 button.width i { display: block; width: 18px; background: currentColor; border-radius: 4px; }
 #mode { font-size: 13px; padding: 0 10px; background: rgba(255, 59, 48, .85); }
 body.mode-pass #mode { background: rgba(52, 199, 89, .85); }
+#settings-toggle[aria-expanded="true"] { background: rgba(255, 255, 255, .18); }
+#settings-toggle.has-update::after { content: ""; position: absolute; width: 7px; height: 7px; margin: -14px -14px 0 0; border-radius: 50%; background: #34c759; }
+
+#settings { width: 340px; padding: 12px 14px; font-size: 13px; display: flex; flex-direction: column; gap: 8px; }
+#settings[hidden] { display: none; }
+#settings h3 { margin: 6px 0 0; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; opacity: .55; }
+#settings .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 28px; }
+#settings .check { justify-content: flex-start; cursor: pointer; }
+#settings input[type="checkbox"] { margin: 0; accent-color: #0a84ff; }
+#settings select { background: #2c2c32; color: #eee; border: 0; border-radius: 6px; padding: 4px 6px; font: inherit; }
+#settings button { height: 28px; font-size: 13px; }
+#settings button.field { background: #2c2c32; padding: 0 10px; min-width: 120px; }
+#settings button.field.recording { outline: 2px solid #0a84ff; }
+#settings button.text { color: #0a84ff; padding: 0 8px; }
+#settings button.danger { color: #ff453a; align-self: flex-start; padding: 0; }
+#settings progress { width: 100%; height: 6px; accent-color: #0a84ff; }
+#settings .error { margin: 0; color: #ff9f0a; font-size: 12px; }
+#settings .about { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 0; }
+#settings .about dt { opacity: .55; }
+#settings .about dd { margin: 0; }
+#settings .selectable { user-select: text; }
+
+#help {
+  position: fixed; right: 12px; top: 50%; transform: translateY(-50%); z-index: 9; width: 250px;
+  padding: 10px 12px; font-size: 12px; color: #eee; background: rgba(24, 24, 28, .82); border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .35); display: flex; flex-direction: column; gap: 5px; pointer-events: none;
+}
+#help[hidden], body.mode-pass #help, body.peek #help { display: none; }
+#help h3 { margin: 0 0 2px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; opacity: .55; }
+#help h4 { margin: 4px 0 0; font-size: 11px; font-weight: 600; opacity: .7; }
+#help .help-row { display: flex; gap: 8px; align-items: baseline; }
+#help .help-row kbd { flex: none; min-width: 84px; }
+#help kbd { font: 11px ui-monospace, monospace; padding: 1px 5px; border-radius: 4px; background: rgba(255, 255, 255, .12); white-space: nowrap; }
+#help .help-tools { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
+#help .help-tool { display: flex; gap: 3px; align-items: center; justify-content: center; padding: 2px 0; border-radius: 6px; background: rgba(255, 255, 255, .06); }
+
+#shot { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 20; cursor: crosshair; }
+#shot[hidden] { display: none; }
+body.shooting #dock, body.shooting #help { display: none; }
+#toast {
+  position: fixed; left: 50%; bottom: 32px; transform: translateX(-50%); z-index: 30; max-width: 80vw;
+  padding: 8px 14px; border-radius: 10px; font-size: 13px; color: #eee; background: rgba(24, 24, 28, .94);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .45); pointer-events: none;
+}
+#toast[hidden] { display: none; }
 
 #editor {
   position: fixed; z-index: 5; margin: 0; padding: 4px; resize: none; overflow: hidden;
   background: rgba(0, 0, 0, .35); border: 1px dashed #fff; border-radius: 6px; outline: none;
-  font-family: system-ui, sans-serif; line-height: 1.25; user-select: text;
+  font-family: system-ui, sans-serif; line-height: 1.25; user-select: text; text-align: left;
 }
