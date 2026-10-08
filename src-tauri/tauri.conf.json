@@ -40,8 +40,8 @@
     "homepage": "https://github.com/ProAnima/Sketchover",
     "copyright": "Copyright (c) 2026 ProAnimaStudio",
     "category": "Productivity",
-    "shortDescription": "Рисование поверх окон",
-    "longDescription": "Sketchover — прозрачный холст поверх всех окон: кисть, стрелки, блоки с текстом, лазерная указка. Вызывается одним хоткеем во время созвона.",
+    "shortDescription": "Draw on your screen during calls",
+    "longDescription": "Sketchover is a transparent canvas over all windows: brush, arrows, Markdown text blocks, region screenshots and a laser pointer. Open it with one hotkey during a call, hold Alt to click through.",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -87,6 +87,7 @@
           "libXrandr"
         ]
       }
-    }
+    },
+    "license": "Apache-2.0"
   }
 }

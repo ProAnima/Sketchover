@@ -3,6 +3,8 @@ name = "sketchover"
 description = "Sketchover — рисование поверх окон (продукт ProAnimaStudio)"
 version = "0.1.0"
 authors = ["ProAnimaStudio"]
+license = "Apache-2.0"
+repository = "https://github.com/ProAnima/Sketchover"
 edition = "2021"
 publish = false
 
