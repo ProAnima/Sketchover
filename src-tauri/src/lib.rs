@@ -15,6 +15,11 @@ use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
 
 use settings::{Store, LANGS};
 
+/// Аргумент автозапуска вместе с системой: тогда стартуем тихо в трее.
+/// Запуск вручную (меню «Пуск», ярлык, Launchpad) сразу открывает холст — иначе после
+/// установки кажется, что ничего не произошло.
+const HIDDEN_ARG: &str = "--hidden";
+
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct AppInfo {
@@ -103,12 +108,15 @@ pub fn run() {
         // Повторный запуск не плодит копии, а показывает холст.
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| overlay::show(app)))
         .plugin(hotkey::plugin())
-        .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, None))
+        .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, Some(vec![HIDDEN_ARG])))
         .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(overlay::ClickThrough::default())
         .manage(hotkey::Status::default())
         .manage(updates::Pending::default())
         .setup(|app| {
+            // macOS: приложение трея — без иконки в Dock и без меню приложения.
+            #[cfg(target_os = "macos")]
+            app.set_activation_policy(tauri::ActivationPolicy::Accessory);
             let handle = app.handle();
             let store = Store::load(handle);
             let accelerator = store.get().hotkey;
@@ -118,6 +126,9 @@ pub fn run() {
             // Занятый хоткей не должен мешать запуску: пользователь увидит это в настройках.
             if hotkey::replace(handle, &app.state::<hotkey::Status>(), None, &accelerator).is_err() {
                 eprintln!("Не удалось зарегистрировать хоткей {accelerator}");
+            }
+            if !std::env::args().any(|a| a == HIDDEN_ARG) {
+                overlay::show(handle);
             }
             Ok(())
         })
