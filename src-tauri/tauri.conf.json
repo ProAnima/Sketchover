@@ -16,7 +16,7 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEExMzVGMERBQTAzNTY3RDQKUldUVVp6V2cydkExb1htSTNMeDd4NVhOSDErSlZRVDRyTHFYM2JCODlTazlsSEZuVjh0MHcwQVMK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEE1MDA5Mzg2ODA4Mzg3NjkKUldScGg0T0FocE1BcGRvU1BTM0k3Q1BoZXZOb0NmTktwb3U2MTFpNWREQ3owWEpvRndtSDk4VTgK",
       "endpoints": [
         "https://hub.proanima.net/v1/sketchover/update/{{target}}/{{arch}}/{{current_version}}",
         "https://github.com/ProAnima/Sketchover/releases/latest/download/latest.json"

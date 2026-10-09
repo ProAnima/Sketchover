@@ -10,3 +10,14 @@ export function addImage(bitmap) {
 }
 
 export const getImage = (id) => images.get(id);
+export const imageCount = () => images.size;
+
+// Программа живёт фоном неделями, а кадр 4K весит десятки мегабайт: картинки, на которые
+// не ссылается ни холст, ни история отмены, освобождаем.
+export function pruneImages(liveIds) {
+  for (const [id, bitmap] of images) {
+    if (liveIds.has(id)) continue;
+    bitmap.close?.();
+    images.delete(id);
+  }
+}

@@ -48,6 +48,8 @@ export function renderHelp() {
   aside.append(row(`${formatKeys('Alt')} + 1…${COLORS.length}`, t('help.colors')));
   aside.append(row(`${formatKeys('Shift')} + 1…${WIDTHS.length}`, t('help.widths')));
   aside.append(row(`${formatKeys('CommandOrControl')} + Z / Y`, t('help.undo')));
+  aside.append(row(`${formatKeys('CommandOrControl')} + ${formatKeys('Shift')} + C`, t('help.copy')));
+  aside.append(row(`${formatKeys('CommandOrControl')} + S / O`, t('help.save')));
   aside.append(row('Del / Shift + Del', t('help.delete')));
 }
 

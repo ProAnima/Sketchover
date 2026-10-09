@@ -5,6 +5,7 @@ import { undo, redo, deleteSelected, clearAll } from './actions.js';
 import { selectTool, applyStyle } from './toolbar.js';
 import { toggleHelp } from './help.js';
 import { takeScreenshot } from './screenshot.js';
+import { copyImage, saveScene, openScene } from './export.js';
 
 // Цифры берём по физической клавише (e.code): работает на любой раскладке и с Alt/Shift
 // (Shift+1 даёт «!», Option+1 на macOS — «¡»).
@@ -28,6 +29,9 @@ export function initKeyboard(tools) {
 
     if (mod && e.code === 'KeyZ') { e.preventDefault(); if (e.shiftKey) redo(); else undo(); return; }
     if (mod && e.code === 'KeyY') { e.preventDefault(); redo(); return; }
+    if (mod && e.shiftKey && e.code === 'KeyC') { e.preventDefault(); copyImage(); return; }
+    if (mod && e.code === 'KeyS') { e.preventDefault(); saveScene(); return; }
+    if (mod && e.code === 'KeyO') { e.preventDefault(); openScene(); return; }
     if (mod) return;
 
     if (idx >= 0) {
