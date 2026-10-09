@@ -38,7 +38,7 @@ Get the installer for your system from the [latest release](https://github.com/P
 |---|---|---|
 | Windows 10/11 | `Sketchover_X.Y.Z_x64-setup.exe` | Run it and click Install. No admin rights needed. |
 | macOS 11+ (Intel and Apple Silicon) | `Sketchover_X.Y.Z_universal.dmg` | Open it and drag Sketchover to Applications. |
-| Linux, any distribution | `Sketchover_X.Y.Z_amd64.AppImage` | `chmod +x` it and run. |
+| Linux (Ubuntu 24.04+, Debian 13+, Fedora 40+) | `Sketchover_X.Y.Z_amd64.AppImage` | `chmod +x` it and run. |
 | Ubuntu, Debian, Mint | `Sketchover_X.Y.Z_amd64.deb` | Double-click, or `sudo apt install ./Sketchover_*.deb`. |
 | Fedora, openSUSE | `Sketchover-X.Y.Z-1.x86_64.rpm` | Double-click, or `sudo dnf install ./Sketchover-*.rpm`. |
 
