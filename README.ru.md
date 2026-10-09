@@ -77,7 +77,7 @@ npm version patch
 
 Секреты репозитория: `TAURI_SIGNING_PRIVATE_KEY` и `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` — ключ подписи обновлений (публичная половина — в `src-tauri/tauri.conf.json`).
 
-Проверки локально: `npm run check` (интерфейс), `cargo clippy --all-targets -- -D warnings` и `cargo test` в `src-tauri/`.
+Проверки локально: `npm run check` (интерфейс), `npm test` (тесты ядра), `cargo clippy --all-targets -- -D warnings` и `cargo test` в `src-tauri/`.
 
 ## Структура
 

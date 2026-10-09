@@ -90,6 +90,7 @@ npm install
 npm start          # run in development
 npm run build      # installer for the current system
 npm run check      # interface checks
+npm test           # core logic tests
 ```
 
 Releases: `npm version patch && git push --follow-tags` — GitHub Actions builds the installers for all three systems into a draft release.
