@@ -1,8 +1,8 @@
 // Скриншот области: снимок экрана под холстом → выделение мышью → картинка на холсте.
 import { state } from '../core/state.js';
-import { addImage } from '../core/images.js';
+import { addImage, imageCount, pruneImages } from '../core/images.js';
 import { createImageShape } from '../core/shapes.js';
-import { commit } from '../core/history.js';
+import { commit, referencedImageIds } from '../core/history.js';
 import { t } from '../i18n/index.js';
 import { api } from './api.js';
 import { finishEdit } from './editor.js';
@@ -119,6 +119,8 @@ async function place(frame, rect) {
   // Картинка — в пикселях экрана (чётко на любом масштабе), фигура — в CSS-пикселях.
   const crop = await createImageBitmap(frame,
     Math.round(rect.x * sx), Math.round(rect.y * sy), Math.round(rect.w * sx), Math.round(rect.h * sy));
+  // Перед новой картинкой освобождаем те, что уже нигде не нужны (удалены и ушли из истории).
+  if (imageCount()) pruneImages(referencedImageIds());
   const shape = createImageShape(addImage(crop), rect.x, rect.y, rect.w, rect.h);
   state.shapes.push(shape);
   commit();
