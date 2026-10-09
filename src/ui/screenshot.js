@@ -14,10 +14,17 @@ const ctx = layer.getContext('2d');
 const MIN_SIZE = 8;
 
 let busy = false;
+let cancelSelection = null; // пока идёт выделение области
 let onPlaced = () => {};
 
 export function initScreenshot({ placed }) {
   onPlaced = placed;
+}
+
+// Режим переключили посреди выделения (хоткей, двойной тап Alt) — выделение отменяется,
+// иначе замороженный кадр остался бы висеть поверх экрана.
+export function cancelScreenshot() {
+  cancelSelection?.();
 }
 
 export async function takeScreenshot() {
@@ -92,6 +99,7 @@ function selectRegion(frame) {
     };
 
     function finish(result) {
+      cancelSelection = null;
       layer.removeEventListener('pointerdown', onDown);
       layer.removeEventListener('pointermove', onMove);
       layer.removeEventListener('pointerup', onUp);
@@ -106,6 +114,7 @@ function selectRegion(frame) {
     layer.addEventListener('pointermove', onMove);
     layer.addEventListener('pointerup', onUp);
     addEventListener('keydown', onKey, true);
+    cancelSelection = () => finish(null);
     document.body.classList.add('shooting');
     layer.hidden = false;
     paint();

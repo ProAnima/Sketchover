@@ -7,7 +7,7 @@ import { setPlatform, formatKeys } from './ui/keys.js';
 import { initKeyboard } from './ui/keyboard.js';
 import { initPointer } from './ui/pointer.js';
 import { initSettings } from './ui/settings.js';
-import { initScreenshot } from './ui/screenshot.js';
+import { initScreenshot, cancelScreenshot } from './ui/screenshot.js';
 import { selectTool } from './ui/toolbar.js';
 import { state } from './core/state.js';
 import { createTools } from './tools/index.js';
@@ -32,7 +32,10 @@ api.on('overlay:show', () => {
   // Глобальный хоткей занят другой программой — без подсказки не понять, почему он не работает.
   if (!info.hotkeyOk) showToast(`${formatKeys(info.hotkey)} — ${t('settings.hotkey.taken')}`);
 });
-api.on('overlay:toggle', toggleMode);
+api.on('overlay:toggle', () => {
+  cancelScreenshot();
+  toggleMode();
+});
 // Зажат Alt: мышь уходит окнам под холстом, рисунок полупрозрачный.
 api.on('overlay:peek', (held) => document.body.classList.toggle('peek', held));
 // Окно стартует спрятанным; режим рисования включится событием overlay:show при первом показе.
