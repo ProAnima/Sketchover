@@ -75,7 +75,7 @@ jobs:
             # Один .dmg для Intel и Apple Silicon.
             args: --target universal-apple-darwin --bundles app,dmg
           - name: Linux
-            os: ubuntu-22.04
+            os: ubuntu-24.04
             args: --bundles appimage,deb,rpm
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60

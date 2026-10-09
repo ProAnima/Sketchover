@@ -20,7 +20,7 @@ Tauri 2 (Rust) + чистый JS без сборки. Интерфейс на 11
 |---|---|---|
 | Windows 10/11 | `Sketchover_X.Y.Z_x64-setup.exe` | Запустить и нажать «Установить». Права администратора не нужны. |
 | macOS 11+ (Intel и Apple Silicon) | `Sketchover_X.Y.Z_universal.dmg` | Открыть и перетащить Sketchover в «Программы». |
-| Linux, любой дистрибутив | `Sketchover_X.Y.Z_amd64.AppImage` | Сделать исполняемым (`chmod +x`) и запустить. |
+| Linux (Ubuntu 24.04+, Debian 13+, Fedora 40+) | `Sketchover_X.Y.Z_amd64.AppImage` | Сделать исполняемым (`chmod +x`) и запустить. |
 | Ubuntu, Debian, Mint | `Sketchover_X.Y.Z_amd64.deb` | Двойной клик или `sudo apt install ./Sketchover_*.deb`. |
 | Fedora, openSUSE | `Sketchover-X.Y.Z-1.x86_64.rpm` | Двойной клик или `sudo dnf install ./Sketchover-*.rpm`. |
 
