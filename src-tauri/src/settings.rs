@@ -25,6 +25,8 @@ pub struct Settings {
     pub auto_update: bool,
     /// Случайный id установки для поэтапной раскатки обновлений в хабе; ничего личного.
     pub install_id: String,
+    /// Автозапуск по умолчанию уже включали. Дальше решает пользователь: выключил — не включаем снова.
+    pub autostart_default_applied: bool,
 }
 
 impl Default for Settings {
@@ -34,6 +36,7 @@ impl Default for Settings {
             hotkey: DEFAULT_HOTKEY.into(),
             auto_update: true,
             install_id: String::new(),
+            autostart_default_applied: false,
         }
     }
 }

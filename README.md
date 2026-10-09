@@ -25,7 +25,7 @@ Sketchover puts a transparent canvas over every window. Press one hotkey on a Zo
 - **Arrows that stick**: arrows attach to text blocks and screenshots and follow them when you move them.
 - **Region screenshots**: press `S`, select part of the screen, and it lands on the canvas — move it, resize it, rotate it.
 - **Keyboard first, layout independent**: `1`…`0` pick tools, `Alt+1…8` colors, `Shift+1…3` stroke width, `F1` shows a cheat sheet.
-- **Stays out of the way**: lives in the tray, one global hotkey (`` Alt+` ``, configurable), opens on the monitor under your cursor.
+- **Always ready, never in the way**: starts with your system and waits in the tray; one global hotkey (`` Alt+` ``, configurable) opens it on the monitor under your cursor.
 - **Small and private**: a ~3 MB installer, no account, nothing leaves your computer except an anonymous update check.
 - **11 languages**: English, Русский, Deutsch, Español, Français, Português, 中文, 日本語, 한국어, العربية, हिन्दी.
 - **Updates itself**, signed releases.
@@ -42,7 +42,7 @@ Get the installer for your system from the [latest release](https://github.com/P
 | Ubuntu, Debian, Mint | `Sketchover_X.Y.Z_amd64.deb` | Double-click, or `sudo apt install ./Sketchover_*.deb`. |
 | Fedora, openSUSE | `Sketchover-X.Y.Z-1.x86_64.rpm` | Double-click, or `sudo dnf install ./Sketchover-*.rpm`. |
 
-Sketchover opens the canvas right after install and then lives in the tray (the menu bar on macOS).
+Sketchover opens the canvas right after install, then lives in the tray (the menu bar on macOS) and starts with your system, so it is always one hotkey away. Turn off “Start with the system” in Settings if you prefer; closing the canvas only hides it — quit from the tray or Settings.
 
 **First launch.** The installers are not yet signed with a paid developer certificate:
 - Windows may show “Windows protected your PC” → More info → Run anyway.
