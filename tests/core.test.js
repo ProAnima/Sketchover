@@ -120,3 +120,49 @@ test('картинки: освобождаются только те, на ко�
   assert.deepEqual(closed, ['dropped']);
   assert.equal(imageCount(), 1);
 });
+
+test('png: чанк со сценой вставляется и читается, кириллица цела', async () => {
+  const { withTextChunk, readTextChunk } = await import('../src/core/png.js');
+  // Минимальный PNG 1×1 (прозрачный пиксель).
+  const png = Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='), (c) => c.charCodeAt(0));
+  const text = JSON.stringify({ hello: 'Привет, 世界' });
+  const out = withTextChunk(png, 'sketchover', text);
+  assert.equal(readTextChunk(out, 'sketchover'), text);
+  assert.equal(readTextChunk(out, 'other'), null);
+  assert.equal(readTextChunk(png, 'sketchover'), null);
+  // Картинка остаётся корректным PNG: начинается с сигнатуры и заканчивается IEND.
+  assert.deepEqual([...out.subarray(0, 8)], [...png.subarray(0, 8)]);
+  assert.equal(String.fromCharCode(...out.subarray(out.length - 8, out.length - 4)), 'IEND');
+  assert.throws(() => withTextChunk(new Uint8Array([1, 2, 3]), 'k', 't'));
+});
+
+test('сцена: упаковка и проверка недоверенного файла', async () => {
+  const { packScene, unpackScene } = await import('../src/core/scene.js');
+  const node = { id: 1, type: 'node', color: '#ff3b30', width: 3, x: 0, y: 0, w: 100, h: 50, size: 18, text: '**Да**' };
+  const arrow = { id: 2, type: 'arrow', color: '#ffffff', width: 3, x1: 0, y1: 0, x2: 50, y2: 50, from: 1, to: 99 };
+  const image = { id: 3, type: 'image', color: '#ffffff', width: 3, x: 0, y: 0, w: 10, h: 10, rotation: 0, imageId: 'img1' };
+  const orphan = { ...image, id: 4, imageId: 'missing' };
+  const bad = [{ id: 5, type: 'script', color: '#000000', width: 1 }, { id: 6, type: 'rect', color: 'red', width: 1, x: 0, y: 0, w: 1, h: 1 }, { id: 7, type: 'rect', color: '#000000', width: 1, x: 'x', y: 0, w: 1, h: 1 }];
+  const scene = unpackScene(packScene([node, arrow, image, orphan, ...bad], { img1: 'AAAA' }));
+  assert.deepEqual(scene.shapes.map((s) => s.id), [1, 2, 3]);
+  assert.equal(scene.shapes[1].from, 1);
+  assert.equal(scene.shapes[1].to, null, 'ссылка на несуществующую фигуру снята');
+  assert.equal(unpackScene('{"app":"other","shapes":[]}'), null);
+  assert.equal(unpackScene('не JSON'), null);
+});
+
+test('история: объём ограничен, но последний шаг отмены всегда есть', () => {
+  reset();
+  commit();
+  // Две огромные «кисти» по ~30 млн символов: вместе больше лимита 50 млн.
+  const big = (n) => ({ ...createShape('rect', 0, 0), id: 1000 + n, text: 'x'.repeat(30_000_000) });
+  state.shapes = [big(1)];
+  commit();
+  state.shapes = [big(2)];
+  commit();
+  state.shapes = [];
+  commit();
+  assert.equal(undo(), true);
+  assert.equal(state.shapes[0].id, 1002, 'последнее состояние восстанавливается');
+  assert.equal(undo(), false, 'старое тяжёлое состояние вытеснено лимитом объёма');
+});
