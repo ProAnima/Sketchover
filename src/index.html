@@ -1,27 +1,71 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; script-src 'self'">
   <title>Sketchover</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="mode-draw">
   <canvas id="board"></canvas>
   <textarea id="editor" hidden spellcheck="false"></textarea>
-  <div id="toolbar">
-    <span id="grip" title="Перетащить панель">⠿</span>
-    <div id="tools" class="group"></div>
-    <div id="colors" class="group"></div>
-    <div id="widths" class="group"></div>
-    <div class="group">
-      <button id="undo" title="Отменить (Ctrl+Z)">↶</button>
-      <button id="redo" title="Повторить (Ctrl+Y)">↷</button>
-      <button id="clear" title="Очистить всё (Ctrl+Alt+C)">🗑</button>
+  <div id="dock">
+    <div id="toolbar">
+      <span id="grip" data-i18n-title="toolbar.grip">⠿</span>
+      <div id="tools" class="group"></div>
+      <div id="colors" class="group"></div>
+      <div id="widths" class="group"></div>
+      <div class="group">
+        <button id="shot-btn" data-i18n-title="toolbar.shot"></button>
+      </div>
+      <div class="group">
+        <button id="undo" data-i18n-title="toolbar.undo">↶</button>
+        <button id="redo" data-i18n-title="toolbar.redo">↷</button>
+        <button id="clear" data-i18n-title="toolbar.clear">🗑</button>
+      </div>
+      <button id="mode" data-i18n-title="toolbar.mode"></button>
+      <button id="help-toggle" data-i18n-title="toolbar.help">?</button>
+      <button id="settings-toggle" data-i18n-title="toolbar.settings" aria-controls="settings" aria-expanded="false">⚙</button>
+      <button id="hide" data-i18n-title="toolbar.hide">✕</button>
     </div>
-    <button id="mode" title="Рисование / сквозные клики (Ctrl+Alt+D, Esc)"></button>
-    <button id="quit" title="Выйти">✕</button>
+    <section id="settings" hidden>
+      <div class="row">
+        <label for="lang" data-i18n="settings.language"></label>
+        <select id="lang"></select>
+      </div>
+      <div class="row">
+        <span data-i18n="settings.hotkey"></span>
+        <button id="hotkey" class="field"></button>
+      </div>
+      <p id="hotkey-error" class="error" hidden></p>
+      <label class="row check">
+        <input type="checkbox" id="autostart">
+        <span data-i18n="settings.autostart"></span>
+      </label>
+
+      <h3 data-i18n="update.title"></h3>
+      <div class="row">
+        <span id="update-status" role="status"></span>
+        <button id="update-action" class="text" hidden></button>
+      </div>
+      <progress id="update-progress" max="100" hidden></progress>
+      <label class="row check">
+        <input type="checkbox" id="auto-update">
+        <span data-i18n="update.auto"></span>
+      </label>
+
+      <h3 data-i18n="about.title"></h3>
+      <dl class="about">
+        <dt>Sketchover</dt><dd id="version"></dd>
+        <dt data-i18n="about.developer"></dt><dd>ProAnimaStudio</dd>
+        <dt data-i18n="about.author"></dt><dd data-i18n="about.authorName"></dd>
+        <dt data-i18n="about.contact"></dt><dd class="selectable">info@proanima.net</dd>
+      </dl>
+      <button id="quit" class="text danger" data-i18n="settings.quit"></button>
+    </section>
   </div>
-  <script src="renderer.js"></script>
+  <aside id="help" hidden></aside>
+  <canvas id="shot" hidden></canvas>
+  <div id="toast" role="status" hidden></div>
+  <script type="module" src="main.js"></script>
 </body>
 </html>

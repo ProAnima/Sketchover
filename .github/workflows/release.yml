@@ -1,0 +1,124 @@
+# Тег версии (vX.Y.Z — его ставит `npm version`) → черновик релиза на GitHub с установщиками
+# для Windows, macOS и Linux, подписанными для автообновления, и latest.json для ProAnima Hub.
+# Опубликовать черновик — решение человека: проверить его на странице релизов.
+name: Release
+
+on:
+  push:
+    tags: ["v[0-9]+.[0-9]+.[0-9]+*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Уже существующий тег, чтобы собрать его заново, например v0.2.0
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  TAG: ${{ inputs.tag || github.ref_name }}
+
+jobs:
+  checks:
+    name: Checks
+    uses: ./.github/workflows/ci.yml
+    with:
+      ref: ${{ inputs.tag || github.ref_name }}
+
+  # Один черновик заранее: иначе три сборки одновременно могли бы создать три релиза.
+  draft:
+    name: Draft release
+    needs: checks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      id: ${{ steps.draft.outputs.id }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+
+      - name: The tag matches package.json
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          test "${TAG#v}" = "$version" || { echo "Тег $TAG не совпадает с версией $version в package.json"; exit 1; }
+
+      - name: Draft
+        id: draft
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release view "$TAG" > /dev/null 2>&1 || gh release create "$TAG" --draft --verify-tag \
+            --title "Sketchover ${TAG#v}" \
+            --notes "Установщики: Windows — .exe, macOS — .dmg (Intel и Apple Silicon), Linux — .AppImage, .deb или .rpm."
+          echo "id=$(gh release view "$TAG" --json databaseId -q .databaseId)" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Build (${{ matrix.name }})
+    needs: draft
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows
+            os: windows-latest
+            args: --bundles nsis
+          - name: macOS
+            os: macos-latest
+            # Один .dmg для Intel и Apple Silicon.
+            args: --target universal-apple-darwin --bundles app,dmg
+          - name: Linux
+            os: ubuntu-24.04
+            args: --bundles appimage,deb,rpm
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Linux system libraries
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libwebkit2gtk-4.1-dev librsvg2-dev libayatana-appindicator3-dev patchelf \
+            pkg-config libclang-dev libxcb1-dev libxrandr-dev libdbus-1-dev \
+            libpipewire-0.3-dev libwayland-dev libegl-dev libgbm-dev
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ runner.os == 'macOS' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+          key: release
+
+      - run: npm ci --no-audit --no-fund
+
+      # Обновление ставится, только если файл подписан этим ключом (публичная половина —
+      # в tauri.conf.json). Без секретов сборка падает, а не выпускает неподписанное.
+      - name: Build and upload to the draft
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          releaseId: ${{ needs.draft.outputs.id }}
+          args: ${{ matrix.args }} --config src-tauri/tauri.updater.conf.json
+          includeUpdaterJson: true
+          updaterJsonPreferNsis: true
