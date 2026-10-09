@@ -30,7 +30,11 @@ pub struct Rect {
 
 impl Rect {
     pub fn is_valid(&self) -> bool {
-        [self.x, self.y, self.w, self.h].iter().all(|v| v.is_finite()) && self.w >= 0.0 && self.h >= 0.0
+        [self.x, self.y, self.w, self.h]
+            .iter()
+            .all(|v| v.is_finite())
+            && self.w >= 0.0
+            && self.h >= 0.0
     }
     fn contains(&self, x: f64, y: f64) -> bool {
         x >= self.x && x <= self.x + self.w && y >= self.y && y <= self.y + self.h
@@ -131,12 +135,17 @@ fn request_sync(app: &AppHandle) {
 
 /// Только в главном потоке: сверяет Alt (удержание, двойной тап) и курсор и выставляет окну, пропускать ли мышь.
 fn sync(app: &AppHandle) {
-    let Some(win) = app.get_webview_window(LABEL) else { return };
+    let Some(win) = app.get_webview_window(LABEL) else {
+        return;
+    };
     let clicks = app.state::<ClickThrough>();
     let visible = clicks.visible.load(Ordering::Relaxed);
     let mut s = clicks.lock();
 
-    let k = keys::poll().filter(|_| visible).unwrap_or(keys::Keys { hold: false, other: false });
+    let k = keys::poll().filter(|_| visible).unwrap_or(keys::Keys {
+        hold: false,
+        other: false,
+    });
     if s.track_taps(k, Instant::now()) {
         // Двойной тап Alt: рисование ⇄ сквозные клики — как глобальный хоткей.
         let _ = app.emit("overlay:toggle", ());
@@ -174,7 +183,10 @@ fn cursor_in(win: &WebviewWindow, rect: Rect) -> Option<bool> {
     let cursor = win.cursor_position().ok()?;
     let origin = win.inner_position().ok()?;
     let scale = win.scale_factor().ok()?;
-    Some(rect.contains((cursor.x - f64::from(origin.x)) / scale, (cursor.y - f64::from(origin.y)) / scale))
+    Some(rect.contains(
+        (cursor.x - f64::from(origin.x)) / scale,
+        (cursor.y - f64::from(origin.y)) / scale,
+    ))
 }
 
 pub fn create(app: &AppHandle) -> tauri::Result<()> {
@@ -192,14 +204,21 @@ pub fn create(app: &AppHandle) -> tauri::Result<()> {
 
     let poll_app = app.clone();
     let handle = thread::spawn(move || loop {
-        if poll_app.state::<ClickThrough>().visible.load(Ordering::Relaxed) {
+        if poll_app
+            .state::<ClickThrough>()
+            .visible
+            .load(Ordering::Relaxed)
+        {
             request_sync(&poll_app);
             thread::sleep(POLL);
         } else {
             thread::park();
         }
     });
-    let _ = app.state::<ClickThrough>().poller.set(handle.thread().clone());
+    let _ = app
+        .state::<ClickThrough>()
+        .poller
+        .set(handle.thread().clone());
     Ok(())
 }
 
@@ -218,7 +237,9 @@ fn fit_to_cursor_monitor(win: &WebviewWindow) {
 
 /// Показать холст в режиме рисования.
 pub fn show(app: &AppHandle) {
-    let Some(win) = app.get_webview_window(LABEL) else { return };
+    let Some(win) = app.get_webview_window(LABEL) else {
+        return;
+    };
     if !win.is_visible().unwrap_or(false) {
         fit_to_cursor_monitor(&win);
         let _ = win.show();
@@ -229,14 +250,19 @@ pub fn show(app: &AppHandle) {
 }
 
 pub fn hide(app: &AppHandle) {
-    let Some(win) = app.get_webview_window(LABEL) else { return };
+    let Some(win) = app.get_webview_window(LABEL) else {
+        return;
+    };
     app.state::<ClickThrough>().set_visible(app, false);
     let _ = win.hide();
 }
 
 /// Глобальный хоткей: спрятан → показать; виден → рисование ⇄ сквозные клики (решает интерфейс).
 pub fn on_hotkey(app: &AppHandle) {
-    let visible = app.get_webview_window(LABEL).and_then(|w| w.is_visible().ok()).unwrap_or(false);
+    let visible = app
+        .get_webview_window(LABEL)
+        .and_then(|w| w.is_visible().ok())
+        .unwrap_or(false);
     if visible {
         let _ = app.emit("overlay:toggle", ());
     } else {
@@ -248,15 +274,26 @@ pub fn on_hotkey(app: &AppHandle) {
 mod tests {
     use super::*;
 
-    const UP: keys::Keys = keys::Keys { hold: false, other: false };
-    const ALT: keys::Keys = keys::Keys { hold: true, other: false };
-    const ALT_TAB: keys::Keys = keys::Keys { hold: true, other: true };
+    const UP: keys::Keys = keys::Keys {
+        hold: false,
+        other: false,
+    };
+    const ALT: keys::Keys = keys::Keys {
+        hold: true,
+        other: false,
+    };
+    const ALT_TAB: keys::Keys = keys::Keys {
+        hold: true,
+        other: true,
+    };
 
     /// Прогоняет последовательность (состояние клавиш, мс от начала); возвращает, был ли двойной тап.
     fn run(steps: &[(keys::Keys, u64)]) -> bool {
         let start = Instant::now();
         let mut s = State::default();
-        steps.iter().any(|&(k, ms)| s.track_taps(k, start + Duration::from_millis(ms)))
+        steps
+            .iter()
+            .any(|&(k, ms)| s.track_taps(k, start + Duration::from_millis(ms)))
     }
 
     #[test]
@@ -283,17 +320,30 @@ mod tests {
     fn combination_is_not_a_tap() {
         // Alt+Tab дважды подряд не должен переключать режим.
         assert!(!run(&[(ALT_TAB, 0), (UP, 100), (ALT_TAB, 200), (UP, 300)]));
-        assert!(!run(&[(ALT, 0), (ALT_TAB, 40), (UP, 100), (ALT, 200), (UP, 300)]));
+        assert!(!run(&[
+            (ALT, 0),
+            (ALT_TAB, 40),
+            (UP, 100),
+            (ALT, 200),
+            (UP, 300)
+        ]));
     }
 
     #[test]
     fn triple_tap_toggles_once() {
         let start = Instant::now();
         let mut s = State::default();
-        let hits = [(ALT, 0), (UP, 80), (ALT, 160), (UP, 240), (ALT, 320), (UP, 400)]
-            .iter()
-            .filter(|&&(k, ms)| s.track_taps(k, start + Duration::from_millis(ms)))
-            .count();
+        let hits = [
+            (ALT, 0),
+            (UP, 80),
+            (ALT, 160),
+            (UP, 240),
+            (ALT, 320),
+            (UP, 400),
+        ]
+        .iter()
+        .filter(|&&(k, ms)| s.track_taps(k, start + Duration::from_millis(ms)))
+        .count();
         assert_eq!(hits, 1);
     }
 }

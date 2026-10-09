@@ -50,7 +50,12 @@ fn get_settings(app: AppHandle, store: State<Store>, status: State<hotkey::Statu
 }
 
 #[tauri::command]
-fn set_language(store: State<Store>, tray: State<tray::Tray>, lang: Option<String>, labels: tray::Labels) -> Result<(), String> {
+fn set_language(
+    store: State<Store>,
+    tray: State<tray::Tray>,
+    lang: Option<String>,
+    labels: tray::Labels,
+) -> Result<(), String> {
     if lang.as_deref().is_some_and(|l| !LANGS.contains(&l)) {
         return Err("invalid".into());
     }
@@ -60,7 +65,12 @@ fn set_language(store: State<Store>, tray: State<tray::Tray>, lang: Option<Strin
 }
 
 #[tauri::command]
-fn set_hotkey(app: AppHandle, store: State<Store>, status: State<hotkey::Status>, accelerator: String) -> Result<(), String> {
+fn set_hotkey(
+    app: AppHandle,
+    store: State<Store>,
+    status: State<hotkey::Status>,
+    accelerator: String,
+) -> Result<(), String> {
     let old = store.get().hotkey;
     hotkey::replace(&app, &status, Some(&old), &accelerator)?;
     store.update(|s| s.hotkey = accelerator);
@@ -70,7 +80,11 @@ fn set_hotkey(app: AppHandle, store: State<Store>, status: State<hotkey::Status>
 #[tauri::command]
 fn set_autostart(app: AppHandle, enabled: bool) -> Result<(), String> {
     let launcher = app.autolaunch();
-    let result = if enabled { launcher.enable() } else { launcher.disable() };
+    let result = if enabled {
+        launcher.enable()
+    } else {
+        launcher.disable()
+    };
     result.map_err(|e| e.to_string())
 }
 
@@ -80,7 +94,12 @@ fn set_auto_update(store: State<Store>, enabled: bool) {
 }
 
 #[tauri::command]
-fn set_pass_through(app: AppHandle, clicks: State<overlay::ClickThrough>, enabled: bool, panel: overlay::Rect) -> Result<(), String> {
+fn set_pass_through(
+    app: AppHandle,
+    clicks: State<overlay::ClickThrough>,
+    enabled: bool,
+    panel: overlay::Rect,
+) -> Result<(), String> {
     if !panel.is_valid() {
         return Err("invalid".into());
     }
@@ -106,9 +125,14 @@ fn quit(app: AppHandle) {
 pub fn run() {
     tauri::Builder::default()
         // Повторный запуск не плодит копии, а показывает холст.
-        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| overlay::show(app)))
+        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            overlay::show(app)
+        }))
         .plugin(hotkey::plugin())
-        .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, Some(vec![HIDDEN_ARG])))
+        .plugin(tauri_plugin_autostart::init(
+            MacosLauncher::LaunchAgent,
+            Some(vec![HIDDEN_ARG]),
+        ))
         .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(overlay::ClickThrough::default())
         .manage(hotkey::Status::default())
@@ -124,7 +148,8 @@ pub fn run() {
             overlay::create(handle)?;
             app.manage(tray::create(handle)?);
             // Занятый хоткей не должен мешать запуску: пользователь увидит это в настройках.
-            if hotkey::replace(handle, &app.state::<hotkey::Status>(), None, &accelerator).is_err() {
+            if hotkey::replace(handle, &app.state::<hotkey::Status>(), None, &accelerator).is_err()
+            {
                 eprintln!("Не удалось зарегистрировать хоткей {accelerator}");
             }
             if !std::env::args().any(|a| a == HIDDEN_ARG) {

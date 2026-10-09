@@ -43,7 +43,12 @@ pub fn parse(accelerator: &str) -> Result<Shortcut, &'static str> {
 }
 
 /// Заменяет текущий хоткей. При ошибке старый остаётся как был.
-pub fn replace(app: &AppHandle, status: &Status, old: Option<&str>, new: &str) -> Result<(), &'static str> {
+pub fn replace(
+    app: &AppHandle,
+    status: &Status,
+    old: Option<&str>,
+    new: &str,
+) -> Result<(), &'static str> {
     let shortcut = parse(new)?;
     let gs = app.global_shortcut();
     let _ = gs.unregister_all();
@@ -52,7 +57,9 @@ pub fn replace(app: &AppHandle, status: &Status, old: Option<&str>, new: &str) -
         return Ok(());
     }
     // Комбинацию держит другая программа — возвращаем прежнюю.
-    let restored = old.and_then(|o| parse(o).ok()).is_some_and(|s| gs.register(s).is_ok());
+    let restored = old
+        .and_then(|o| parse(o).ok())
+        .is_some_and(|s| gs.register(s).is_ok());
     status.0.store(restored, Ordering::Relaxed);
     Err("taken")
 }
