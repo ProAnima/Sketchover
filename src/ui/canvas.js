@@ -48,6 +48,8 @@ function drawLaser(now) {
   const pts = state.laser.points;
   while (pts.length && now - pts[0].t > LASER_LIFETIME_MS) pts.shift();
   for (let i = 1; i < pts.length; i++) {
+    // Новый штрих начинается с чистого места — без линии от хвоста прошлого через весь экран.
+    if (pts[i].start) continue;
     const age = (now - pts[i].t) / LASER_LIFETIME_MS;
     ctx.save();
     ctx.strokeStyle = `rgba(255,59,48,${1 - age})`;
