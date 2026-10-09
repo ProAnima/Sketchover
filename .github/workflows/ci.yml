@@ -20,8 +20,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check:
-    name: Checks
+  interface:
+    name: Interface
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -33,27 +33,50 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Interface
+      - name: Syntax, imports, dictionaries, core tests
         run: |
           npm ci --no-audit --no-fund
           npm run check
           npm test
 
+  # На всех трёх системах: у каждой свой платформенный код (опрос Alt, окно, диалоги),
+  # и он должен компилироваться до релиза, а не впервые на теге.
+  rust:
+    name: Rust (${{ matrix.name }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux
+            os: ubuntu-24.04
+          - name: Windows
+            os: windows-latest
+          - name: macOS
+            os: macos-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+
       - name: Linux system libraries
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            libwebkit2gtk-4.1-dev librsvg2-dev libayatana-appindicator3-dev patchelf \
-            pkg-config libclang-dev libxcb1-dev libxrandr-dev libdbus-1-dev \
-            libpipewire-0.3-dev libwayland-dev libegl-dev libgbm-dev
+          sudo apt-get install -y --no-install-recommends             libwebkit2gtk-4.1-dev librsvg2-dev libayatana-appindicator3-dev patchelf             pkg-config libclang-dev libxcb1-dev libxrandr-dev libdbus-1-dev             libpipewire-0.3-dev libwayland-dev libegl-dev libgbm-dev
 
       - uses: dtolnay/rust-toolchain@stable
         with:
-          components: clippy
+          components: clippy, rustfmt
 
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: src-tauri
+
+      - name: Format
+        if: runner.os == 'Linux'
+        working-directory: src-tauri
+        run: cargo fmt --check
 
       - name: Clippy
         working-directory: src-tauri
