@@ -1,7 +1,8 @@
-//! Процесс ОС: окно-оверлей, трей, глобальный хоткей, настройки, обновления.
+//! Процесс ОС: окно-оверлей, трей, глобальный хоткей, настройки, файлы холста, обновления.
 //! О рисовании здесь ничего не знают — это целиком интерфейс в `src/`.
 
 mod capture;
+mod files;
 mod hotkey;
 mod keys;
 mod overlay;
@@ -148,6 +149,8 @@ pub fn run() {
             Some(vec![HIDDEN_ARG]),
         ))
         .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_clipboard_manager::init())
         .manage(overlay::ClickThrough::default())
         .manage(hotkey::Status::default())
         .manage(updates::Pending::default())
@@ -161,13 +164,12 @@ pub fn run() {
             app.manage(store);
             overlay::create(handle)?;
             app.manage(tray::create(handle)?);
-            // Занятый хоткей не должен мешать запуску: пользователь увидит это в настройках.
-            if hotkey::replace(handle, &app.state::<hotkey::Status>(), None, &accelerator).is_err()
-            {
-                eprintln!("Не удалось зарегистрировать хоткей {accelerator}");
-            }
+            // Занятый хоткей не мешает запуску, но без него холст не открыть ничем, кроме трея —
+            // поэтому тогда показываем холст и при автозапуске: интерфейс скажет, что делать.
+            let hotkey_ok =
+                hotkey::replace(handle, &app.state::<hotkey::Status>(), None, &accelerator).is_ok();
             enable_autostart_once(handle);
-            if !std::env::args().any(|a| a == HIDDEN_ARG) {
+            if !hotkey_ok || !std::env::args().any(|a| a == HIDDEN_ARG) {
                 overlay::show(handle);
             }
             Ok(())
@@ -185,6 +187,9 @@ pub fn run() {
             updates::check_update,
             updates::install_update,
             capture::capture_screen,
+            files::copy_image,
+            files::save_png,
+            files::open_png,
         ])
         .run(tauri::generate_context!())
         .expect("не удалось запустить Sketchover");

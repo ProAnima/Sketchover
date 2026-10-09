@@ -24,6 +24,8 @@ Sketchover puts a transparent canvas over every window. Press one hotkey on a Zo
 - **Text blocks with Markdown**: headings, bullet and numbered lists (they continue on `Enter`), **bold**, *italic*, `code`, ~~strikethrough~~.
 - **Arrows that stick**: arrows attach to text blocks and screenshots and follow them when you move them.
 - **Region screenshots**: press `S`, select part of the screen, and it lands on the canvas — move it, resize it, rotate it.
+- **Paste into the chat**: `Ctrl+Shift+C` copies your drawing as an image — paste it into Zoom, Teams, Slack or Telegram.
+- **Save and keep editing**: `Ctrl+S` saves a PNG that opens anywhere and still contains the editable canvas — open it later with `Ctrl+O`.
 - **Keyboard first, layout independent**: `1`…`0` pick tools, `Alt+1…8` colors, `Shift+1…3` stroke width, `F1` shows a cheat sheet.
 - **Always ready, never in the way**: starts with your system and waits in the tray; one global hotkey (`` Alt+` ``, configurable) opens it on the monitor under your cursor.
 - **Small and private**: a ~3 MB installer, no account, nothing leaves your computer except an anonymous update check.
@@ -61,6 +63,8 @@ Sketchover opens the canvas right after install, then lives in the tray (the men
 | Region screenshot | `S` |
 | Color / stroke width | `Alt+1…8` / `Shift+1…3` |
 | Undo / redo | `Ctrl+Z` / `Ctrl+Y` |
+| Copy the drawing as an image | `Ctrl+Shift+C` |
+| Save / open (PNG with the editable canvas inside) | `Ctrl+S` / `Ctrl+O` |
 | Delete selected / clear all | `Delete` / `Shift+Delete` |
 | Edit a text block | double-click it with any tool |
 | Cheat sheet | `F1` |
@@ -79,6 +83,8 @@ If you are looking for an **Epic Pen, ZoomIt, gInk, ppInk or Presentify alternat
 
 **Does it collect data?** No account, no analytics in the canvas. The only network request is the update check, sent with a random install ID.
 
+**How do I keep a drawing?** `Ctrl+S` saves a regular PNG — it opens in any image viewer — with the canvas embedded, so `Ctrl+O` brings it back fully editable. Or `Ctrl+Shift+C` and paste it straight into the chat.
+
 **Is everything the same on Linux?** Almost: holding or double-tapping `Alt` is Windows and macOS only for now. On Linux, switch click-through with `Esc`, the mode button or the global hotkey.
 
 ## Build from source
@@ -90,9 +96,10 @@ npm install
 npm start          # run in development
 npm run build      # installer for the current system
 npm run check      # interface checks
+npm test           # core logic tests
 ```
 
-Releases: `npm version patch && git push --follow-tags` — GitHub Actions builds the installers for all three systems into a draft release.
+Releases: add a `## [X.Y.Z]` section to [CHANGELOG.md](CHANGELOG.md), then `npm version X.Y.Z && git push --follow-tags` — GitHub Actions builds the installers for all three systems into a draft release with those notes.
 
 Tauri 2 (Rust) for the system side, plain JavaScript modules for the canvas, no bundler. Project rules: [CLAUDE.md](CLAUDE.md), roadmap: [docs/ROADMAP.md](docs/ROADMAP.md).
 

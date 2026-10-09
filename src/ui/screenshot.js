@@ -1,8 +1,8 @@
 // Скриншот области: снимок экрана под холстом → выделение мышью → картинка на холсте.
 import { state } from '../core/state.js';
-import { addImage } from '../core/images.js';
+import { addImage, imageCount, pruneImages } from '../core/images.js';
 import { createImageShape } from '../core/shapes.js';
-import { commit } from '../core/history.js';
+import { commit, referencedImageIds } from '../core/history.js';
 import { t } from '../i18n/index.js';
 import { api } from './api.js';
 import { finishEdit } from './editor.js';
@@ -14,10 +14,17 @@ const ctx = layer.getContext('2d');
 const MIN_SIZE = 8;
 
 let busy = false;
+let cancelSelection = null; // пока идёт выделение области
 let onPlaced = () => {};
 
 export function initScreenshot({ placed }) {
   onPlaced = placed;
+}
+
+// Режим переключили посреди выделения (хоткей, двойной тап Alt) — выделение отменяется,
+// иначе замороженный кадр остался бы висеть поверх экрана.
+export function cancelScreenshot() {
+  cancelSelection?.();
 }
 
 export async function takeScreenshot() {
@@ -92,6 +99,7 @@ function selectRegion(frame) {
     };
 
     function finish(result) {
+      cancelSelection = null;
       layer.removeEventListener('pointerdown', onDown);
       layer.removeEventListener('pointermove', onMove);
       layer.removeEventListener('pointerup', onUp);
@@ -106,6 +114,7 @@ function selectRegion(frame) {
     layer.addEventListener('pointermove', onMove);
     layer.addEventListener('pointerup', onUp);
     addEventListener('keydown', onKey, true);
+    cancelSelection = () => finish(null);
     document.body.classList.add('shooting');
     layer.hidden = false;
     paint();
@@ -119,6 +128,8 @@ async function place(frame, rect) {
   // Картинка — в пикселях экрана (чётко на любом масштабе), фигура — в CSS-пикселях.
   const crop = await createImageBitmap(frame,
     Math.round(rect.x * sx), Math.round(rect.y * sy), Math.round(rect.w * sx), Math.round(rect.h * sy));
+  // Перед новой картинкой освобождаем те, что уже нигде не нужны (удалены и ушли из истории).
+  if (imageCount()) pruneImages(referencedImageIds());
   const shape = createImageShape(addImage(crop), rect.x, rect.y, rect.w, rect.h);
   state.shapes.push(shape);
   commit();

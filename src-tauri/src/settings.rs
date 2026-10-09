@@ -16,7 +16,7 @@ pub const LANGS: [&str; 11] = [
     "ru", "en", "de", "es", "fr", "pt", "zh", "ja", "ko", "ar", "hi",
 ];
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
 pub struct Settings {
     /// `None` — язык системы.
@@ -73,12 +73,15 @@ impl Store {
             .as_ref()
             .and_then(|p| fs::read_to_string(p).ok())
             .and_then(|text| serde_json::from_str::<Settings>(&text).ok());
-        let fresh = loaded.is_none();
+        let settings = loaded.clone().unwrap_or_default().sanitize();
+        // Сохраняем и новый файл, и исправленный при чтении: иначе, например, сгенерированный
+        // install_id менялся бы на каждом запуске, и хаб считал бы каждый запуск новой установкой.
+        let changed = loaded.as_ref() != Some(&settings);
         let store = Self {
             path,
-            data: Mutex::new(loaded.unwrap_or_default().sanitize()),
+            data: Mutex::new(settings),
         };
-        if fresh {
+        if changed {
             store.save();
         }
         store
@@ -103,5 +106,47 @@ impl Store {
         if let Err(e) = written {
             eprintln!("Не удалось сохранить настройки: {e}");
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn missing_or_broken_values_get_defaults() {
+        let s: Settings = serde_json::from_str(r#"{"lang":"xx","hotkey":"  "}"#).unwrap();
+        let s = s.sanitize();
+        assert_eq!(s.lang, None);
+        assert_eq!(s.hotkey, DEFAULT_HOTKEY);
+        assert!(uuid::Uuid::parse_str(&s.install_id).is_ok());
+        assert!(s.auto_update);
+        assert!(!s.autostart_default_applied);
+    }
+
+    #[test]
+    fn legacy_default_hotkey_is_migrated_but_custom_kept() {
+        let legacy = Settings {
+            hotkey: LEGACY_HOTKEY.into(),
+            ..Settings::default()
+        }
+        .sanitize();
+        assert_eq!(legacy.hotkey, DEFAULT_HOTKEY);
+        let custom = Settings {
+            hotkey: "Control+Shift+K".into(),
+            ..Settings::default()
+        }
+        .sanitize();
+        assert_eq!(custom.hotkey, "Control+Shift+K");
+    }
+
+    #[test]
+    fn valid_settings_stay_unchanged() {
+        let s = Settings::default().sanitize();
+        assert_eq!(
+            s.clone().sanitize(),
+            s,
+            "повторная проверка ничего не меняет — файл не перезаписывается зря"
+        );
     }
 }
