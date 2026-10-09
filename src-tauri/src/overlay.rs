@@ -200,7 +200,18 @@ pub fn create(app: &AppHandle) -> tauri::Result<()> {
         .visible_on_all_workspaces(true)
         .skip_taskbar(true)
         .visible(false)
-        .build()?;
+        .build()?
+        // Alt+F4 / Cmd+W не выходят из программы, а прячут холст в трей: она должна жить фоном.
+        // Выход — явно, из трея или настроек.
+        .on_window_event({
+            let app = app.clone();
+            move |event| {
+                if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                    api.prevent_close();
+                    hide(&app);
+                }
+            }
+        });
 
     let poll_app = app.clone();
     let handle = thread::spawn(move || loop {

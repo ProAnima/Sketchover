@@ -122,6 +122,20 @@ fn quit(app: AppHandle) {
     app.exit(0);
 }
 
+/// Программа нужна во время созвона — значит, должна уже ждать в трее. Поэтому автозапуск
+/// включаем сами, один раз; выключил в настройках — больше не трогаем. В отладочной сборке —
+/// нет, иначе в автозагрузку попал бы exe из target/debug.
+fn enable_autostart_once(app: &AppHandle) {
+    let store = app.state::<Store>();
+    if cfg!(debug_assertions) || store.get().autostart_default_applied {
+        return;
+    }
+    match app.autolaunch().enable() {
+        Ok(()) => store.update(|s| s.autostart_default_applied = true),
+        Err(e) => eprintln!("Не удалось включить автозапуск: {e}"),
+    }
+}
+
 pub fn run() {
     tauri::Builder::default()
         // Повторный запуск не плодит копии, а показывает холст.
@@ -152,6 +166,7 @@ pub fn run() {
             {
                 eprintln!("Не удалось зарегистрировать хоткей {accelerator}");
             }
+            enable_autostart_once(handle);
             if !std::env::args().any(|a| a == HIDDEN_ARG) {
                 overlay::show(handle);
             }
