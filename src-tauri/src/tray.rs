@@ -39,7 +39,12 @@ pub fn create(app: &AppHandle) -> tauri::Result<Tray> {
             _ => {}
         })
         .on_tray_icon_event(|tray, event| {
-            if let TrayIconEvent::Click { button: MouseButton::Left, button_state: MouseButtonState::Up, .. } = event {
+            if let TrayIconEvent::Click {
+                button: MouseButton::Left,
+                button_state: MouseButtonState::Up,
+                ..
+            } = event
+            {
                 overlay::show(tray.app_handle());
             }
         });

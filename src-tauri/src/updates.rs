@@ -30,7 +30,11 @@ fn text(e: impl ToString) -> String {
 }
 
 #[tauri::command]
-pub async fn check_update(app: AppHandle, store: State<'_, Store>, pending: State<'_, Pending>) -> Result<Option<Found>, String> {
+pub async fn check_update(
+    app: AppHandle,
+    store: State<'_, Store>,
+    pending: State<'_, Pending>,
+) -> Result<Option<Found>, String> {
     let install_id = store.get().install_id;
     let update = app
         .updater_builder()
@@ -41,7 +45,10 @@ pub async fn check_update(app: AppHandle, store: State<'_, Store>, pending: Stat
         .check()
         .await
         .map_err(text)?;
-    let found = update.as_ref().map(|u| Found { version: u.version.clone(), notes: u.body.clone() });
+    let found = update.as_ref().map(|u| Found {
+        version: u.version.clone(),
+        notes: u.body.clone(),
+    });
     *pending.0.lock().unwrap_or_else(|e| e.into_inner()) = update;
     Ok(found)
 }
@@ -49,7 +56,12 @@ pub async fn check_update(app: AppHandle, store: State<'_, Store>, pending: Stat
 /// Скачивает, ставит и перезапускает приложение. Прогресс — событием `update:progress`.
 #[tauri::command]
 pub async fn install_update(app: AppHandle, pending: State<'_, Pending>) -> Result<(), String> {
-    let update = pending.0.lock().unwrap_or_else(|e| e.into_inner()).take().ok_or("none")?;
+    let update = pending
+        .0
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .take()
+        .ok_or("none")?;
     let mut received = 0u64;
     update
         .download_and_install(

@@ -18,7 +18,10 @@ pub async fn capture_screen(app: AppHandle) -> Result<Response, String> {
     let win = app.get_webview_window(overlay::LABEL).ok_or("no window")?;
     let pos = win.inner_position().map_err(|e| e.to_string())?;
     let size = win.inner_size().map_err(|e| e.to_string())?;
-    let center = (pos.x + size.width as i32 / 2, pos.y + size.height as i32 / 2);
+    let center = (
+        pos.x + size.width as i32 / 2,
+        pos.y + size.height as i32 / 2,
+    );
 
     win.hide().map_err(|e| e.to_string())?;
     pause(HIDE_DELAY).await;

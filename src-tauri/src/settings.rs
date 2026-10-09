@@ -12,7 +12,9 @@ pub const DEFAULT_HOTKEY: &str = "Alt+Backquote";
 /// Прежнее значение по умолчанию — переводим на новое, пользователь его не выбирал.
 const LEGACY_HOTKEY: &str = "CommandOrControl+Alt+D";
 /// Языки интерфейса — те же, что в `src/i18n`.
-pub const LANGS: [&str; 11] = ["ru", "en", "de", "es", "fr", "pt", "zh", "ja", "ko", "ar", "hi"];
+pub const LANGS: [&str; 11] = [
+    "ru", "en", "de", "es", "fr", "pt", "zh", "ja", "ko", "ar", "hi",
+];
 
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
@@ -27,7 +29,12 @@ pub struct Settings {
 
 impl Default for Settings {
     fn default() -> Self {
-        Self { lang: None, hotkey: DEFAULT_HOTKEY.into(), auto_update: true, install_id: String::new() }
+        Self {
+            lang: None,
+            hotkey: DEFAULT_HOTKEY.into(),
+            auto_update: true,
+            install_id: String::new(),
+        }
     }
 }
 
@@ -54,13 +61,20 @@ pub struct Store {
 
 impl Store {
     pub fn load(app: &AppHandle) -> Self {
-        let path = app.path().app_config_dir().ok().map(|d| d.join("settings.json"));
+        let path = app
+            .path()
+            .app_config_dir()
+            .ok()
+            .map(|d| d.join("settings.json"));
         let loaded = path
             .as_ref()
             .and_then(|p| fs::read_to_string(p).ok())
             .and_then(|text| serde_json::from_str::<Settings>(&text).ok());
         let fresh = loaded.is_none();
-        let store = Self { path, data: Mutex::new(loaded.unwrap_or_default().sanitize()) };
+        let store = Self {
+            path,
+            data: Mutex::new(loaded.unwrap_or_default().sanitize()),
+        };
         if fresh {
             store.save();
         }
@@ -79,7 +93,10 @@ impl Store {
     fn save(&self) {
         let Some(path) = &self.path else { return };
         let json = serde_json::to_string_pretty(&self.get()).unwrap_or_default();
-        let written = path.parent().map_or(Ok(()), fs::create_dir_all).and_then(|()| fs::write(path, json));
+        let written = path
+            .parent()
+            .map_or(Ok(()), fs::create_dir_all)
+            .and_then(|()| fs::write(path, json));
         if let Err(e) = written {
             eprintln!("Не удалось сохранить настройки: {e}");
         }
