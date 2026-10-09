@@ -25,6 +25,15 @@ function restore(json) {
   revision++;
 }
 
+// Id картинок, на которые ссылаются холст и вся история отмены/повтора.
+export function referencedImageIds() {
+  const ids = new Set();
+  for (const json of [committed, ...undoStack, ...redoStack]) {
+    for (const m of json.matchAll(/"imageId":"([^"]+)"/g)) ids.add(m[1]);
+  }
+  return ids;
+}
+
 // Возвращают true, если состояние изменилось.
 export function undo() {
   if (!undoStack.length) return false;
