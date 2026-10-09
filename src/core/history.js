@@ -1,6 +1,9 @@
 import { state } from './state.js';
 
 const LIMIT = 200;
+// И по объёму: длинные штрихи кистью — тысячи точек, 200 полных копий холста заняли бы сотни МБ.
+const MAX_CHARS = 50_000_000;
+const stackChars = () => undoStack.reduce((sum, json) => sum + json.length, 0);
 let committed = '[]';
 let revision = 0;
 // Растёт при каждом изменении истории — по нему видно, менял ли что-то конкретный клик.
@@ -12,7 +15,7 @@ export function commit() {
   const now = JSON.stringify(state.shapes);
   if (now === committed) return;
   undoStack.push(committed);
-  if (undoStack.length > LIMIT) undoStack.shift();
+  while (undoStack.length > LIMIT || (undoStack.length > 1 && stackChars() > MAX_CHARS)) undoStack.shift();
   redoStack.length = 0;
   committed = now;
   revision++;
