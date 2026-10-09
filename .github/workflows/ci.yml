@@ -1,4 +1,4 @@
-# Проверки на каждый пуш и PR: Rust (clippy, тесты) и интерфейс (синтаксис, импорты, словари).
+# Проверки на каждый пуш и PR: Rust (clippy, тесты) и интерфейс (синтаксис, импорты, словари, тесты ядра).
 name: CI
 
 on:
@@ -37,6 +37,7 @@ jobs:
         run: |
           npm ci --no-audit --no-fund
           npm run check
+          npm test
 
       - name: Linux system libraries
         run: |
