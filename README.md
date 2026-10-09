@@ -34,6 +34,8 @@ Sketchover puts a transparent canvas over every window. Press one hotkey on a Zo
 
 Get the installer for your system from the [latest release](https://github.com/ProAnima/Sketchover/releases/latest).
 
+> The first release is being prepared. Until it is out, [build from source](#build-from-source).
+
 | System | File | Install |
 |---|---|---|
 | Windows 10/11 | `Sketchover_X.Y.Z_x64-setup.exe` | Run it and click Install. No admin rights needed. |
