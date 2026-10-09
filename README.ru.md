@@ -76,7 +76,7 @@ npm start
 npm version patch
 ```
 
-`npm version` (`patch`, `minor` или `major`) поднимает версию в `package.json` и `src-tauri/Cargo.toml`, коммитит и ставит тег `vX.Y.Z`. После `git push --follow-tags` GitHub Actions (`.github/workflows/release.yml`) проверяет код, собирает установщики для Windows, macOS и Linux, подписывает их для автообновления и кладёт в **черновик** релиза вместе с `latest.json`. Опубликовать черновик — вручную, после проверки; с публикацией версию видят ProAnima Hub и установленные приложения.
+Сначала — раздел `## [X.Y.Z]` в [CHANGELOG.md](CHANGELOG.md): из него берутся заметки релиза. `npm version` (`patch`, `minor`, `major` или номер) поднимает версию в `package.json` и `src-tauri/Cargo.toml`, коммитит и ставит тег `vX.Y.Z`. После `git push --follow-tags` GitHub Actions (`.github/workflows/release.yml`) проверяет код, собирает установщики для Windows, macOS и Linux, подписывает их для автообновления и кладёт в **черновик** релиза вместе с `latest.json`. Опубликовать черновик — вручную, после проверки; с публикацией версию видят ProAnima Hub и установленные приложения.
 
 Секреты репозитория: `TAURI_SIGNING_PRIVATE_KEY` и `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` — ключ подписи обновлений (публичная половина — в `src-tauri/tauri.conf.json`).
 

@@ -53,9 +53,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Заметки — раздел версии из CHANGELOG.md; без раздела релиз не выпускаем.
+          awk -v v="${TAG#v}" 'index($0, "## [" v "]") == 1 { on = 1; next } on && /^## \[/ { exit } on' CHANGELOG.md > notes.md
+          test -s notes.md || { echo "В CHANGELOG.md нет раздела ## [${TAG#v}]"; exit 1; }
           gh release view "$TAG" > /dev/null 2>&1 || gh release create "$TAG" --draft --verify-tag \
-            --title "Sketchover ${TAG#v}" \
-            --notes "Установщики: Windows — .exe, macOS — .dmg (Intel и Apple Silicon), Linux — .AppImage, .deb или .rpm."
+            --title "Sketchover ${TAG#v}" --notes-file notes.md
           echo "id=$(gh release view "$TAG" --json databaseId -q .databaseId)" >> "$GITHUB_OUTPUT"
 
   build:

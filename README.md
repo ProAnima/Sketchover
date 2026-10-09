@@ -99,7 +99,7 @@ npm run check      # interface checks
 npm test           # core logic tests
 ```
 
-Releases: `npm version patch && git push --follow-tags` — GitHub Actions builds the installers for all three systems into a draft release.
+Releases: add a `## [X.Y.Z]` section to [CHANGELOG.md](CHANGELOG.md), then `npm version X.Y.Z && git push --follow-tags` — GitHub Actions builds the installers for all three systems into a draft release with those notes.
 
 Tauri 2 (Rust) for the system side, plain JavaScript modules for the canvas, no bundler. Project rules: [CLAUDE.md](CLAUDE.md), roadmap: [docs/ROADMAP.md](docs/ROADMAP.md).
 
