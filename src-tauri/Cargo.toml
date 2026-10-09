@@ -1,0 +1,40 @@
+[package]
+name = "sketchover"
+description = "Sketchover — рисование поверх окон (продукт ProAnimaStudio)"
+version = "0.1.0"
+authors = ["ProAnimaStudio"]
+license = "Apache-2.0"
+repository = "https://github.com/ProAnima/Sketchover"
+edition = "2021"
+publish = false
+
+[lib]
+# Суффикс `_lib`, чтобы имя библиотеки не совпало с бинарником на Windows (rust-lang/cargo#8519).
+name = "sketchover_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+# macos-private-api — прозрачное окно на macOS.
+tauri = { version = "2", features = ["tray-icon", "macos-private-api"] }
+tauri-plugin-global-shortcut = "2"
+tauri-plugin-single-instance = "2"
+tauri-plugin-autostart = "2"
+tauri-plugin-updater = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4"] }
+# Снимок экрана для скриншотов области (Windows, macOS, Linux X11/Wayland).
+xcap = "0.9"
+
+[target.'cfg(windows)'.dependencies]
+# Состояние Ctrl вне фокуса окна (GetAsyncKeyState).
+windows-sys = { version = "0.61", features = ["Win32_UI_Input_KeyboardAndMouse"] }
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+strip = true
