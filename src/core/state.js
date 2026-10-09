@@ -16,3 +16,5 @@ export const state = {
 
 let lastId = 0;
 export const newId = () => ++lastId;
+// После открытия файла новые фигуры не должны получить id уже существующих.
+export const reserveIds = (maxId) => { lastId = Math.max(lastId, maxId); };

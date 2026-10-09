@@ -15,5 +15,9 @@ export const api = {
   checkUpdate: () => invoke('check_update'),
   installUpdate: () => invoke('install_update'),
   captureScreen: () => invoke('capture_screen'),
+  // Байты PNG — телом запроса (без JSON); имя — подсказка для диалога, в заголовке только ASCII.
+  savePng: (bytes, name) => invoke('save_png', bytes, { headers: { 'x-file-name': encodeURIComponent(name) } }),
+  openPng: () => invoke('open_png'),
+  copyImage: (rgba, width, height) => invoke('copy_image', rgba, { headers: { 'x-width': String(width), 'x-height': String(height) } }),
   on: (event, handler) => listen(event, (e) => handler(e.payload)),
 };

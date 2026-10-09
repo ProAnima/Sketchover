@@ -1,7 +1,8 @@
-//! Процесс ОС: окно-оверлей, трей, глобальный хоткей, настройки, обновления.
+//! Процесс ОС: окно-оверлей, трей, глобальный хоткей, настройки, файлы холста, обновления.
 //! О рисовании здесь ничего не знают — это целиком интерфейс в `src/`.
 
 mod capture;
+mod files;
 mod hotkey;
 mod keys;
 mod overlay;
@@ -148,6 +149,8 @@ pub fn run() {
             Some(vec![HIDDEN_ARG]),
         ))
         .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_clipboard_manager::init())
         .manage(overlay::ClickThrough::default())
         .manage(hotkey::Status::default())
         .manage(updates::Pending::default())
@@ -184,6 +187,9 @@ pub fn run() {
             updates::check_update,
             updates::install_update,
             capture::capture_screen,
+            files::copy_image,
+            files::save_png,
+            files::open_png,
         ])
         .run(tauri::generate_context!())
         .expect("не удалось запустить Sketchover");

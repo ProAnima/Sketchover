@@ -9,7 +9,11 @@ import { setMode, toggleMode, relabelMode, syncPassThrough } from './mode.js';
 import { undo, redo, clearAll } from './actions.js';
 import { toolIcon } from './icons.js';
 import { takeScreenshot } from './screenshot.js';
+import { copyImage, saveScene, openScene } from './export.js';
 
+const COPY = 'M8 3h9a2 2 0 0 1 2 2v11h-2V5H8zM5 7h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 2v10h9V9z';
+const SAVE = 'M5 3h11l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm2 2v4h8V5zm5 8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z';
+const OPEN = 'M3 6a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z';
 const CAMERA = 'M9 4 7.5 6H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-3.5L15 4zm3 4.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9zm0 2a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z';
 
 const $ = (s) => document.querySelector(s);
@@ -110,6 +114,10 @@ export function initToolbar(toolList) {
   enableDrag();
   $('#shot-btn').append(toolIcon({ iconPath: CAMERA }));
   $('#shot-btn').addEventListener('click', takeScreenshot);
+  for (const [id, path, action] of [['#copy-btn', COPY, copyImage], ['#save-btn', SAVE, saveScene], ['#open-btn', OPEN, openScene]]) {
+    $(id).append(toolIcon({ iconPath: path }));
+    $(id).addEventListener('click', action);
+  }
   $('#undo').addEventListener('click', undo);
   $('#redo').addEventListener('click', redo);
   $('#clear').addEventListener('click', clearAll);
