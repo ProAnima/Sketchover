@@ -63,6 +63,7 @@ hotkeyButton.addEventListener('keydown', async (e) => {
   try {
     await api.setHotkey(combo.accel);
     info.hotkey = combo.accel;
+    info.hotkeyOk = true;
     showHotkeyError(null);
     onRelabel();
   } catch (code) {
