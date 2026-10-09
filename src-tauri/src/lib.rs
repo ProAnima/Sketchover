@@ -161,13 +161,12 @@ pub fn run() {
             app.manage(store);
             overlay::create(handle)?;
             app.manage(tray::create(handle)?);
-            // Занятый хоткей не должен мешать запуску: пользователь увидит это в настройках.
-            if hotkey::replace(handle, &app.state::<hotkey::Status>(), None, &accelerator).is_err()
-            {
-                eprintln!("Не удалось зарегистрировать хоткей {accelerator}");
-            }
+            // Занятый хоткей не мешает запуску, но без него холст не открыть ничем, кроме трея —
+            // поэтому тогда показываем холст и при автозапуске: интерфейс скажет, что делать.
+            let hotkey_ok =
+                hotkey::replace(handle, &app.state::<hotkey::Status>(), None, &accelerator).is_ok();
             enable_autostart_once(handle);
-            if !std::env::args().any(|a| a == HIDDEN_ARG) {
+            if !hotkey_ok || !std::env::args().any(|a| a == HIDDEN_ARG) {
                 overlay::show(handle);
             }
             Ok(())
