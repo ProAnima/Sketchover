@@ -2,11 +2,15 @@
 
 All notable changes to Sketchover. The release workflow takes the notes for each version from this file.
 
-## [Unreleased]
+## [0.2.0]
+
+### Fixed
+- The toolbar no longer runs off the screen on small displays (1024–1366 px wide): it wraps onto a second row.
+- macOS: no Dock icon — Sketchover lives in the menu bar only, as intended.
 
 ### Install
 - Branded installers: the Windows setup shows the Sketchover artwork, the macOS disk image shows where to drag the app.
-- Every release is now smoke-tested before it is published: installed and started on Windows, macOS and Linux.
+- Every release is smoke-tested before it is published: installed and started on clean Windows, macOS and Linux machines, with a check that the canvas is transparent.
 
 ## [0.1.0] — first release
 
