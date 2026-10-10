@@ -18,8 +18,10 @@ on:
   pull_request:
     paths: [".github/workflows/smoke.yml", "scripts/smoke-*.py"]
 
+# Запись — не для изменений: черновик релиза виден только с правом записи. Вызванный
+# из release.yml workflow может лишь урезать права, поэтому они нужны здесь, а не только там.
 permissions:
-  contents: read
+  contents: write
 
 env:
   REPO: ${{ github.repository }}
