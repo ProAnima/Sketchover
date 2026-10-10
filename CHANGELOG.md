@@ -2,6 +2,12 @@
 
 All notable changes to Sketchover. The release workflow takes the notes for each version from this file.
 
+## [Unreleased]
+
+### Install
+- Branded installers: the Windows setup shows the Sketchover artwork, the macOS disk image shows where to drag the app.
+- Every release is now smoke-tested before it is published: installed and started on Windows, macOS and Linux.
+
 ## [0.1.0] — first release
 
 Draw on your screen during calls — a free screen annotation tool for Windows, macOS and Linux.
