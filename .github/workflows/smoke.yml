@@ -1,5 +1,6 @@
 # Проверка установщиков запуском на чистых машинах Windows, macOS и Linux: установить так же,
-# как пользователь, запустить, убедиться, что программа жива и создала настройки, снять экран.
+# как пользователь, запустить, убедиться, что программа жива, создала настройки и что холст
+# прозрачный (снимки экрана до и после — scripts/smoke-transparency.py).
 # Из release.yml — для черновика перед публикацией; вручную — для любого тега.
 name: Smoke
 
@@ -15,7 +16,7 @@ on:
         description: Тег релиза, например v0.1.0 (пусто — последний опубликованный)
         required: false
   pull_request:
-    paths: [".github/workflows/smoke.yml"]
+    paths: [".github/workflows/smoke.yml", "scripts/smoke-transparency.py"]
 
 permissions:
   contents: read
@@ -42,6 +43,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: scripts
+
       - name: Release tag
         shell: bash
         run: |
@@ -56,32 +61,38 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
+          python -m pip install --quiet pillow
+          Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+          function Shot($path) {
+            $b = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+            $bmp = New-Object System.Drawing.Bitmap $b.Width, $b.Height
+            [System.Drawing.Graphics]::FromImage($bmp).CopyFromScreen($b.Location, [System.Drawing.Point]::Empty, $b.Size)
+            $bmp.Save($path)
+          }
           gh release download $env:TAG --repo $env:REPO -p "*_x64-setup.exe" -D dist
           $setup = Get-ChildItem dist\*_x64-setup.exe | Select-Object -First 1
           Start-Process $setup.FullName -ArgumentList '/S' -Wait
           $exe = Get-ChildItem "$env:LOCALAPPDATA\Sketchover" -Filter *.exe | Where-Object Name -notmatch 'uninstall' | Select-Object -First 1
           if (-not $exe) { throw 'Программа не установилась' }
           "Установлено: $($exe.FullName)"
-          (Get-Item $exe.FullName).VersionInfo | Format-List ProductName, FileVersion, CompanyName
+          Shot "smoke\windows-before.png"
           $p = Start-Process $exe.FullName -PassThru
           Start-Sleep $env:ALIVE_SECONDS
           if ($p.HasExited) { throw "Программа завершилась с кодом $($p.ExitCode)" }
-          Add-Type -AssemblyName System.Windows.Forms, System.Drawing
-          $b = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
-          $bmp = New-Object System.Drawing.Bitmap $b.Width, $b.Height
-          [System.Drawing.Graphics]::FromImage($bmp).CopyFromScreen($b.Location, [System.Drawing.Point]::Empty, $b.Size)
-          $bmp.Save("smoke\windows.png")
+          Shot "smoke\windows.png"
           $settings = "$env:APPDATA\studio.proanima.sketchover\settings.json"
           if (-not (Test-Path $settings)) { throw 'Настройки не созданы' }
-          Get-Content $settings | Select-String -NotMatch installId
           Stop-Process -Id $p.Id
+          python scripts\smoke-transparency.py smoke\windows-before.png smoke\windows.png --require
+          if ($LASTEXITCODE) { throw 'Холст не прозрачный' }
 
-      # ---------- macOS: из DMG в «Программы», как это делает человек ----------
+      # ---------- macOS: из DMG в «Программы» и запуск через open, как это делает человек ----------
       - name: Install and run (macOS)
         if: runner.os == 'macOS'
         shell: bash
         run: |
           set -euo pipefail
+          python3 -m pip install --quiet --user --break-system-packages pillow
           gh release download "$TAG" --repo "$REPO" -p "*_universal.dmg" -D dist
           hdiutil attach dist/*_universal.dmg -mountpoint /Volumes/Sketchover -nobrowse
           ls -la /Volumes/Sketchover
@@ -89,14 +100,19 @@ jobs:
           hdiutil detach /Volumes/Sketchover
           bin="$(ls /Applications/Sketchover.app/Contents/MacOS/* | head -1)"
           lipo -archs "$bin"
-          codesign -dv /Applications/Sketchover.app 2>&1 | grep -E "Signature|Identifier" || true
-          "$bin" > smoke/stdout.txt 2> smoke/stderr.txt &
-          pid=$!
+          echo "Без иконки в Dock (LSUIElement): $(defaults read /Applications/Sketchover.app/Contents/Info LSUIElement 2>/dev/null || echo нет)"
+          # Под холстом — окно Finder, чтобы было что увидеть сквозь него.
+          open /System/Applications
+          sleep 3
+          screencapture -x smoke/macos-before.png
+          open /Applications/Sketchover.app
           sleep "$ALIVE_SECONDS"
-          kill -0 "$pid" || { cat smoke/stderr.txt; echo "Программа завершилась"; exit 1; }
-          screencapture -x smoke/macos.png || echo "Снимок экрана недоступен на этой машине"
+          pid="$(pgrep -f "$bin" || true)"
+          [ -n "$pid" ] || { echo "Программа не запущена"; exit 1; }
+          screencapture -x smoke/macos.png
           test -f "$HOME/Library/Application Support/studio.proanima.sketchover/settings.json" || { echo "Настройки не созданы"; exit 1; }
-          kill "$pid"
+          kill $pid
+          python3 scripts/smoke-transparency.py smoke/macos-before.png smoke/macos.png --require
 
       # ---------- Linux: .deb через apt (проверяет зависимости пакета) и AppImage ----------
       - name: Install and run (Linux)
@@ -105,7 +121,9 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends xvfb xauth dbus-x11 imagemagick
+          # xcompmgr — композитор: без него в X11 прозрачных окон не бывает, на рабочем столе он есть.
+          sudo apt-get install -y --no-install-recommends xvfb xauth dbus-x11 imagemagick \
+            x11-xserver-utils xcompmgr python3-pil
           gh release download "$TAG" --repo "$REPO" -p "*_amd64.deb" -p "*_amd64.AppImage" -D dist
           sudo apt-get install -y ./dist/*_amd64.deb
           pkg="$(dpkg-deb -f dist/*_amd64.deb Package)"
@@ -117,14 +135,19 @@ jobs:
             name="$1"; shift
             rm -rf "$HOME/.config/studio.proanima.sketchover"
             xvfb-run -a -s "-screen 0 1920x1080x24" dbus-run-session -- bash -c '
+              set -e
+              xsetroot -solid "#3a6ea5"
+              xcompmgr & sleep 1
+              import -window root "smoke/linux-'"$name"'-before.png"
               "$@" > "smoke/'"$name"'-stdout.txt" 2> "smoke/'"$name"'-stderr.txt" &
               pid=$!
               sleep "$ALIVE_SECONDS"
               kill -0 "$pid" || { cat "smoke/'"$name"'-stderr.txt"; echo "Программа завершилась"; exit 1; }
-              import -window root "smoke/linux-'"$name"'.png" || true
+              import -window root "smoke/linux-'"$name"'.png"
               kill "$pid"
             ' _ "$@"
             test -f "$HOME/.config/studio.proanima.sketchover/settings.json" || { echo "Настройки не созданы"; exit 1; }
+            python3 scripts/smoke-transparency.py "smoke/linux-$name-before.png" "smoke/linux-$name.png" --require
             echo "$name: работает"
           }
           check deb "$bin"
