@@ -1,0 +1,140 @@
+# Проверка установщиков запуском на чистых машинах Windows, macOS и Linux: установить так же,
+# как пользователь, запустить, убедиться, что программа жива и создала настройки, снять экран.
+# Из release.yml — для черновика перед публикацией; вручную — для любого тега.
+name: Smoke
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Тег релиза, например v0.1.0 (пусто — последний опубликованный)
+        required: false
+  pull_request:
+    paths: [".github/workflows/smoke.yml"]
+
+permissions:
+  contents: read
+
+env:
+  REPO: ${{ github.repository }}
+  GH_TOKEN: ${{ github.token }}
+  # Сколько секунд программа должна проработать без падения.
+  ALIVE_SECONDS: 15
+
+jobs:
+  smoke:
+    name: Smoke (${{ matrix.name }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows
+            os: windows-latest
+          - name: macOS
+            os: macos-latest
+          - name: Linux
+            os: ubuntu-24.04
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - name: Release tag
+        shell: bash
+        run: |
+          tag="${{ inputs.tag }}"
+          [ -n "$tag" ] || tag="$(gh release view --repo "$REPO" --json tagName -q .tagName)"
+          echo "TAG=$tag" >> "$GITHUB_ENV"
+          echo "Проверяем $tag"
+          mkdir -p smoke
+
+      # ---------- Windows: тихая установка NSIS в профиль пользователя ----------
+      - name: Install and run (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          gh release download $env:TAG --repo $env:REPO -p "*_x64-setup.exe" -D dist
+          $setup = Get-ChildItem dist\*_x64-setup.exe | Select-Object -First 1
+          Start-Process $setup.FullName -ArgumentList '/S' -Wait
+          $exe = Get-ChildItem "$env:LOCALAPPDATA\Sketchover" -Filter *.exe | Where-Object Name -notmatch 'uninstall' | Select-Object -First 1
+          if (-not $exe) { throw 'Программа не установилась' }
+          "Установлено: $($exe.FullName)"
+          (Get-Item $exe.FullName).VersionInfo | Format-List ProductName, FileVersion, CompanyName
+          $p = Start-Process $exe.FullName -PassThru
+          Start-Sleep $env:ALIVE_SECONDS
+          if ($p.HasExited) { throw "Программа завершилась с кодом $($p.ExitCode)" }
+          Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+          $b = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+          $bmp = New-Object System.Drawing.Bitmap $b.Width, $b.Height
+          [System.Drawing.Graphics]::FromImage($bmp).CopyFromScreen($b.Location, [System.Drawing.Point]::Empty, $b.Size)
+          $bmp.Save("smoke\windows.png")
+          $settings = "$env:APPDATA\studio.proanima.sketchover\settings.json"
+          if (-not (Test-Path $settings)) { throw 'Настройки не созданы' }
+          Get-Content $settings | Select-String -NotMatch installId
+          Stop-Process -Id $p.Id
+
+      # ---------- macOS: из DMG в «Программы», как это делает человек ----------
+      - name: Install and run (macOS)
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release download "$TAG" --repo "$REPO" -p "*_universal.dmg" -D dist
+          hdiutil attach dist/*_universal.dmg -mountpoint /Volumes/Sketchover -nobrowse
+          ls -la /Volumes/Sketchover
+          cp -R /Volumes/Sketchover/Sketchover.app /Applications/
+          hdiutil detach /Volumes/Sketchover
+          bin="$(ls /Applications/Sketchover.app/Contents/MacOS/* | head -1)"
+          lipo -archs "$bin"
+          codesign -dv /Applications/Sketchover.app 2>&1 | grep -E "Signature|Identifier" || true
+          "$bin" > smoke/stdout.txt 2> smoke/stderr.txt &
+          pid=$!
+          sleep "$ALIVE_SECONDS"
+          kill -0 "$pid" || { cat smoke/stderr.txt; echo "Программа завершилась"; exit 1; }
+          screencapture -x smoke/macos.png || echo "Снимок экрана недоступен на этой машине"
+          test -f "$HOME/Library/Application Support/studio.proanima.sketchover/settings.json" || { echo "Настройки не созданы"; exit 1; }
+          kill "$pid"
+
+      # ---------- Linux: .deb через apt (проверяет зависимости пакета) и AppImage ----------
+      - name: Install and run (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends xvfb xauth dbus-x11 imagemagick
+          gh release download "$TAG" --repo "$REPO" -p "*_amd64.deb" -p "*_amd64.AppImage" -D dist
+          sudo apt-get install -y ./dist/*_amd64.deb
+          pkg="$(dpkg-deb -f dist/*_amd64.deb Package)"
+          bin="$(dpkg -L "$pkg" | grep '^/usr/bin/' | head -1)"
+          echo "Установлено: $pkg → $bin"
+          chmod +x dist/*_amd64.AppImage
+          appimage="$(ls dist/*_amd64.AppImage)"
+          check() { # имя, команда…
+            name="$1"; shift
+            rm -rf "$HOME/.config/studio.proanima.sketchover"
+            xvfb-run -a -s "-screen 0 1920x1080x24" dbus-run-session -- bash -c '
+              "$@" > "smoke/'"$name"'-stdout.txt" 2> "smoke/'"$name"'-stderr.txt" &
+              pid=$!
+              sleep "$ALIVE_SECONDS"
+              kill -0 "$pid" || { cat "smoke/'"$name"'-stderr.txt"; echo "Программа завершилась"; exit 1; }
+              import -window root "smoke/linux-'"$name"'.png" || true
+              kill "$pid"
+            ' _ "$@"
+            test -f "$HOME/.config/studio.proanima.sketchover/settings.json" || { echo "Настройки не созданы"; exit 1; }
+            echo "$name: работает"
+          }
+          check deb "$bin"
+          # На машинах CI нет FUSE — AppImage запускается с распаковкой.
+          check appimage "$appimage" --appimage-extract-and-run
+
+      - name: Screenshots and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-${{ matrix.name }}
+          path: smoke/
+          if-no-files-found: ignore

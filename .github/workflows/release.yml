@@ -124,3 +124,14 @@ jobs:
           args: ${{ matrix.args }} --config src-tauri/tauri.updater.conf.json
           includeUpdaterJson: true
           updaterJsonPreferNsis: true
+
+  # Перед публикацией: установщики из черновика ставятся и запускаются на всех трёх системах.
+  smoke:
+    name: Smoke
+    needs: build
+    # Черновик видят только участники с правом записи.
+    permissions:
+      contents: write
+    uses: ./.github/workflows/smoke.yml
+    with:
+      tag: ${{ inputs.tag || github.ref_name }}
