@@ -57,6 +57,7 @@ export default {
   'settings.quit': 'Sketchover बंद करें',
   'update.title': 'अपडेट',
   'update.auto': 'शुरू होने पर जाँचें',
+  'settings.stats': 'गुमनाम उपयोग आँकड़े भेजें',
   'update.check': 'जाँचें',
   'update.checking': 'जाँच हो रही है…',
   'update.current': 'आपके पास नवीनतम संस्करण है',

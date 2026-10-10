@@ -57,6 +57,7 @@ export default {
   'settings.quit': 'Sketchover を終了',
   'update.title': 'アップデート',
   'update.auto': '起動時に確認',
+  'settings.stats': '匿名の利用統計を送信',
   'update.check': '確認',
   'update.checking': '確認中…',
   'update.current': '最新バージョンです',

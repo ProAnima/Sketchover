@@ -57,6 +57,7 @@ export default {
   'settings.quit': 'Quitter Sketchover',
   'update.title': 'Mises à jour',
   'update.auto': 'Vérifier au démarrage',
+  'settings.stats': 'Envoyer des statistiques d’utilisation anonymes',
   'update.check': 'Vérifier',
   'update.checking': 'Vérification…',
   'update.current': 'Vous avez la dernière version',

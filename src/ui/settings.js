@@ -173,6 +173,8 @@ export function initSettings(appInfo, { relabel }) {
   });
   $('#auto-update').checked = info.autoUpdate;
   $('#auto-update').addEventListener('change', (e) => api.setAutoUpdate(e.target.checked));
+  $('#share-stats').checked = info.shareStats;
+  $('#share-stats').addEventListener('change', (e) => api.setShareStats(e.target.checked));
   $('#quit').addEventListener('click', () => api.quit());
 
   toggle.addEventListener('click', () => setOpen(panel.hidden));
