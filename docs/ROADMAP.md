@@ -74,7 +74,8 @@
 
 ### Обновления через ProAnima Hub
 - `tauri-plugin-updater`: хаб первым, GitHub Releases запасным — `https://hub.proanima.net/v1/sketchover/update/{{target}}/{{arch}}/{{current_version}}`.
-- Случайный `install_id` (UUID) в заголовке `X-Install-Id` — для поэтапной раскатки. Больше ничего в сеть не уходит.
+- Случайный `install_id` (UUID) в заголовке `X-Install-Id` — для поэтапной раскатки; по нему же хаб отличает уникальные скачивания и обновления от повторных.
+- Анонимная статистика (`stats.rs`, настройка «Отправлять анонимную статистику», включена по умолчанию): `launch` при старте и `heartbeat` раз в 5 минут, пока программа работает, — `POST /v1/sketchover/events` с `install_id`, версией, системой и архитектурой. По пульсу хаб считает онлайн. Отладочная сборка ничего не шлёт.
 - Подпись: собственный ключ minisign Sketchover (не общий с Signal Lab — утечка одного не затронет другое). Публичный — в `tauri.conf.json`, приватный и пароль — только в секретах CI (`TAURI_SIGNING_PRIVATE_KEY`, `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`) и у владельца в `~/.tauri/sketchover-updater.*`.
 
 ## Релизы

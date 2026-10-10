@@ -57,6 +57,7 @@ export default {
   'settings.quit': '退出 Sketchover',
   'update.title': '更新',
   'update.auto': '启动时检查',
+  'settings.stats': '发送匿名使用统计',
   'update.check': '检查',
   'update.checking': '正在检查…',
   'update.current': '已是最新版本',
