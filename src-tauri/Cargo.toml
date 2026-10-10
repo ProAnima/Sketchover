@@ -30,6 +30,9 @@ tauri-plugin-clipboard-manager = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 uuid = { version = "1", features = ["v4"] }
+# Анонимная статистика в хаб. Тот же reqwest и rustls, что у плагина обновлений, — новых пакетов не добавляют.
+reqwest = { version = "0.13", default-features = false, features = ["json", "rustls-no-provider"] }
+rustls = { version = "0.23", default-features = false, features = ["ring"] }
 # Снимок экрана для скриншотов области (Windows, macOS, Linux X11/Wayland).
 xcap = "0.9"
 

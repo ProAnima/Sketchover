@@ -28,7 +28,7 @@ Sketchover puts a transparent canvas over every window. Press one hotkey on a Zo
 - **Save and keep editing**: `Ctrl+S` saves a PNG that opens anywhere and still contains the editable canvas — open it later with `Ctrl+O`.
 - **Keyboard first, layout independent**: `1`…`0` pick tools, `Alt+1…8` colors, `Shift+1…3` stroke width, `F1` shows a cheat sheet.
 - **Always ready, never in the way**: starts with your system and waits in the tray; one global hotkey (`` Alt+` ``, configurable) opens it on the monitor under your cursor.
-- **Small and private**: a ~3 MB installer, no account, nothing leaves your computer except an anonymous update check.
+- **Small and private**: a ~3 MB installer, no account; only an anonymous update check and anonymous usage statistics leave your computer, and the statistics can be turned off.
 - **11 languages**: English, Русский, Deutsch, Español, Français, Português, 中文, 日本語, 한국어, العربية, हिन्दी.
 - **Updates itself**, signed releases.
 
@@ -80,7 +80,7 @@ If you are looking for an **Epic Pen, ZoomIt, gInk, ppInk or Presentify alternat
 
 **Does it work with Zoom, Google Meet, Teams, Discord, Slack huddles?** Yes — Sketchover draws over the screen itself, so it works with any app that shares your screen.
 
-**Does it collect data?** No account, no analytics in the canvas. The only network request is the update check, sent with a random install ID.
+**Does it collect data?** No account, and nothing about what you draw. Sketchover checks for updates and, unless you turn it off in Settings, sends anonymous usage statistics to ProAnima Hub: a launch and a heartbeat every 5 minutes while it runs, with a random install ID, the app version, the OS and the architecture. Nothing else.
 
 **How do I keep a drawing?** `Ctrl+S` saves a regular PNG — it opens in any image viewer — with the canvas embedded, so `Ctrl+O` brings it back fully editable. Or `Ctrl+Shift+C` and paste it straight into the chat.
 

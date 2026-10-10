@@ -2,6 +2,11 @@
 
 All notable changes to Sketchover. The release workflow takes the notes for each version from this file.
 
+## [0.3.0]
+
+### Added
+- Anonymous usage statistics for ProAnima Hub: a launch and a heartbeat every 5 minutes while Sketchover runs, with a random install ID, the app version, the OS and the architecture — nothing about what you draw. On by default; turn it off in Settings → *Send anonymous usage statistics*.
+
 ## [0.2.0]
 
 ### Fixed

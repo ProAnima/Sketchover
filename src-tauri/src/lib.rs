@@ -1,4 +1,5 @@
-//! Процесс ОС: окно-оверлей, трей, глобальный хоткей, настройки, файлы холста, обновления.
+//! Процесс ОС: окно-оверлей, трей, глобальный хоткей, настройки, файлы холста, обновления,
+//! анонимная статистика.
 //! О рисовании здесь ничего не знают — это целиком интерфейс в `src/`.
 
 mod capture;
@@ -7,6 +8,7 @@ mod hotkey;
 mod keys;
 mod overlay;
 mod settings;
+mod stats;
 mod tray;
 mod updates;
 
@@ -31,6 +33,7 @@ struct AppInfo {
     hotkey_ok: bool,
     autostart: bool,
     auto_update: bool,
+    share_stats: bool,
     /// Работает ли удержание Alt для сквозных кликов на этой системе.
     hold_supported: bool,
 }
@@ -46,6 +49,7 @@ fn get_settings(app: AppHandle, store: State<Store>, status: State<hotkey::Statu
         hotkey_ok: status.ok(),
         autostart: app.autolaunch().is_enabled().unwrap_or(false),
         auto_update: s.auto_update,
+        share_stats: s.share_stats,
         hold_supported: keys::poll().is_some(),
     }
 }
@@ -92,6 +96,11 @@ fn set_autostart(app: AppHandle, enabled: bool) -> Result<(), String> {
 #[tauri::command]
 fn set_auto_update(store: State<Store>, enabled: bool) {
     store.update(|s| s.auto_update = enabled);
+}
+
+#[tauri::command]
+fn set_share_stats(store: State<Store>, enabled: bool) {
+    store.update(|s| s.share_stats = enabled);
 }
 
 #[tauri::command]
@@ -169,6 +178,7 @@ pub fn run() {
             let hotkey_ok =
                 hotkey::replace(handle, &app.state::<hotkey::Status>(), None, &accelerator).is_ok();
             enable_autostart_once(handle);
+            stats::start(handle);
             if !hotkey_ok || !std::env::args().any(|a| a == HIDDEN_ARG) {
                 overlay::show(handle);
             }
@@ -180,6 +190,7 @@ pub fn run() {
             set_hotkey,
             set_autostart,
             set_auto_update,
+            set_share_stats,
             set_pass_through,
             focus_window,
             hide_overlay,

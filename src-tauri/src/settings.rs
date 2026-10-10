@@ -23,6 +23,8 @@ pub struct Settings {
     pub lang: Option<String>,
     pub hotkey: String,
     pub auto_update: bool,
+    /// Анонимная статистика в хаб (`stats.rs`); человек может выключить.
+    pub share_stats: bool,
     /// Случайный id установки для поэтапной раскатки обновлений в хабе; ничего личного.
     pub install_id: String,
     /// Автозапуск по умолчанию уже включали. Дальше решает пользователь: выключил — не включаем снова.
@@ -35,6 +37,7 @@ impl Default for Settings {
             lang: None,
             hotkey: DEFAULT_HOTKEY.into(),
             auto_update: true,
+            share_stats: true,
             install_id: String::new(),
             autostart_default_applied: false,
         }
@@ -121,6 +124,10 @@ mod tests {
         assert_eq!(s.hotkey, DEFAULT_HOTKEY);
         assert!(uuid::Uuid::parse_str(&s.install_id).is_ok());
         assert!(s.auto_update);
+        assert!(
+            s.share_stats,
+            "статистика включена и у старых настроек без этого поля"
+        );
         assert!(!s.autostart_default_applied);
     }
 
