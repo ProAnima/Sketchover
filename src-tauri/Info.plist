@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Дополнения к Info.plist приложения (Tauri подмешивает этот файл при сборке). -->
+<plist version="1.0">
+<dict>
+  <!-- Приложение строки меню: без иконки в Dock с самого запуска. ActivationPolicy::Accessory
+       в коде срабатывает позже и не всегда — проверка запуском на macOS показала иконку в Dock. -->
+  <key>LSUIElement</key>
+  <true/>
+</dict>
+</plist>
