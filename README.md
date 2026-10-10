@@ -36,7 +36,6 @@ Sketchover puts a transparent canvas over every window. Press one hotkey on a Zo
 
 Get the installer for your system from the [latest release](https://github.com/ProAnima/Sketchover/releases/latest).
 
-> The first release is being prepared. Until it is out, [build from source](#build-from-source).
 
 | System | File | Install |
 |---|---|---|
@@ -46,7 +45,7 @@ Get the installer for your system from the [latest release](https://github.com/P
 | Ubuntu, Debian, Mint | `Sketchover_X.Y.Z_amd64.deb` | Double-click, or `sudo apt install ./Sketchover_*.deb`. |
 | Fedora, openSUSE | `Sketchover-X.Y.Z-1.x86_64.rpm` | Double-click, or `sudo dnf install ./Sketchover-*.rpm`. |
 
-Sketchover opens the canvas right after install, then lives in the tray (the menu bar on macOS) and starts with your system, so it is always one hotkey away. Turn off “Start with the system” in Settings if you prefer; closing the canvas only hides it — quit from the tray or Settings.
+Sketchover opens the canvas right after install — press `` Alt+` `` (the key left of `1`) any time to bring it back. It then lives in the tray (the menu bar on macOS) and starts with your system, so it is always one hotkey away. Turn off “Start with the system” in Settings if you prefer; closing the canvas only hides it — quit from the tray or Settings.
 
 **First launch.** The installers are not yet signed with a paid developer certificate:
 - Windows may show “Windows protected your PC” → More info → Run anyway.
@@ -99,7 +98,7 @@ npm run check      # interface checks
 npm test           # core logic tests
 ```
 
-Releases: add a `## [X.Y.Z]` section to [CHANGELOG.md](CHANGELOG.md), then `npm version X.Y.Z && git push --follow-tags` — GitHub Actions builds the installers for all three systems into a draft release with those notes.
+Releases: add a `## [X.Y.Z]` section to [CHANGELOG.md](CHANGELOG.md), then `npm version X.Y.Z && git push --follow-tags` — GitHub Actions builds, signs and smoke-tests the installers for all three systems in a draft release with those notes. Publish the draft, then promote the version to `stable` in ProAnima Hub.
 
 Tauri 2 (Rust) for the system side, plain JavaScript modules for the canvas, no bundler. Project rules: [CLAUDE.md](CLAUDE.md), roadmap: [docs/ROADMAP.md](docs/ROADMAP.md).
 
