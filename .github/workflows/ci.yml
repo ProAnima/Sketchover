@@ -63,7 +63,10 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends             libwebkit2gtk-4.1-dev librsvg2-dev libayatana-appindicator3-dev patchelf             pkg-config libclang-dev libxcb1-dev libxrandr-dev libdbus-1-dev             libpipewire-0.3-dev libwayland-dev libegl-dev libgbm-dev
+          sudo apt-get install -y --no-install-recommends \
+            libwebkit2gtk-4.1-dev librsvg2-dev libayatana-appindicator3-dev patchelf \
+            pkg-config libclang-dev libxcb1-dev libxrandr-dev libdbus-1-dev \
+            libpipewire-0.3-dev libwayland-dev libegl-dev libgbm-dev
 
       - uses: dtolnay/rust-toolchain@stable
         with:
