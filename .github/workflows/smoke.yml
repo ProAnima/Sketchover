@@ -16,7 +16,7 @@ on:
         description: Тег релиза, например v0.1.0 (пусто — последний опубликованный)
         required: false
   pull_request:
-    paths: [".github/workflows/smoke.yml", "scripts/smoke-transparency.py"]
+    paths: [".github/workflows/smoke.yml", "scripts/smoke-*.py"]
 
 permissions:
   contents: read
@@ -123,7 +123,7 @@ jobs:
           sudo apt-get update
           # xcompmgr — композитор: без него в X11 прозрачных окон не бывает, на рабочем столе он есть.
           sudo apt-get install -y --no-install-recommends xvfb xauth dbus-x11 imagemagick \
-            x11-xserver-utils xcompmgr python3-pil
+            xcompmgr python3-pil python3-tk
           gh release download "$TAG" --repo "$REPO" -p "*_amd64.deb" -p "*_amd64.AppImage" -D dist
           sudo apt-get install -y ./dist/*_amd64.deb
           pkg="$(dpkg-deb -f dist/*_amd64.deb Package)"
@@ -136,8 +136,10 @@ jobs:
             rm -rf "$HOME/.config/studio.proanima.sketchover"
             xvfb-run -a -s "-screen 0 1920x1080x24" dbus-run-session -- bash -c '
               set -e
-              xsetroot -solid "#3a6ea5"
               xcompmgr & sleep 1
+              # Под холстом — синее окно во весь экран: фон корня композитор не рисует.
+              python3 scripts/smoke-backdrop.py &
+              sleep 2
               import -window root "smoke/linux-'"$name"'-before.png"
               "$@" > "smoke/'"$name"'-stdout.txt" 2> "smoke/'"$name"'-stderr.txt" &
               pid=$!
