@@ -6,6 +6,10 @@
 
 <p align="center"><b>Рисуйте поверх экрана во время созвона</b> — кисть, стрелки, блоки с Markdown, скриншоты области, лазерная указка.<br>Бесплатно, для Windows, macOS и Linux.</p>
 
+<p align="center">
+  <a href="https://www.producthunt.com/products/sketchover?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-sketchover" target="_blank" rel="noopener noreferrer"><img alt="Sketchover - Draw on your screen during calls and presentations | Product Hunt" width="250" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1276074&amp;theme=dark&amp;t=1791702358557"></a>
+</p>
+
 <p align="center"><a href="README.md">English</a> · <b>Русский</b></p>
 
 Прозрачный холст поверх любых окон. Живёт в трее и открывается одним хоткеем; зажали `Alt` — мышь работает с окнами под холстом, отпустили — снова рисуете. Продукт ProAnimaStudio, автор — Ян Панаев.

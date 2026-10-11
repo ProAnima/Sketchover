@@ -13,6 +13,10 @@
   <a href="https://github.com/ProAnima/Sketchover/actions/workflows/ci.yml"><img src="https://github.com/ProAnima/Sketchover/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
 </p>
 
+<p align="center">
+  <a href="https://www.producthunt.com/products/sketchover?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-sketchover" target="_blank" rel="noopener noreferrer"><img alt="Sketchover - Draw on your screen during calls and presentations | Product Hunt" width="250" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1276074&amp;theme=dark&amp;t=1791702358557"></a>
+</p>
+
 <p align="center"><b>English</b> · <a href="README.ru.md">Русский</a></p>
 
 Sketchover puts a transparent canvas over every window. Press one hotkey on a Zoom, Google Meet, Microsoft Teams or Discord call, share your whole screen, and draw right on top of whatever you are showing — code, a design, a spreadsheet, a website. Hold `Alt` and your mouse goes back to the apps underneath, so you can click and scroll without losing your drawing.
