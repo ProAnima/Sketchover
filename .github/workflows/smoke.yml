@@ -40,7 +40,10 @@ jobs:
             os: windows-latest
           - name: macOS
             os: macos-latest
-          - name: Linux
+          # Самая старая поддерживаемая LTS (на ней проверяет каталог AppImage) и свежая.
+          - name: Linux 22.04
+            os: ubuntu-22.04
+          - name: Linux 24.04
             os: ubuntu-24.04
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
