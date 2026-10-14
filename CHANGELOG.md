@@ -11,6 +11,12 @@ All notable changes to Sketchover. The release workflow takes the notes for each
 ### Changed
 - macOS: double-tap `⌘` toggles click-through by default instead of `⌥` — double `⌥` opens other apps (Claude's quick entry, for one). Holding `⌥` still sends the mouse to the windows below.
 
+### Fixed
+- Anonymous usage statistics were never sent in 0.3.0: the request ran outside the async runtime and stopped the statistics thread. Drawing was not affected.
+
+### Install
+- Linux: built on Ubuntu 22.04, so the AppImage, `.deb` and `.rpm` now also run on Ubuntu 22.04, Debian 12, Linux Mint 21 and Fedora 36 and newer (before: Ubuntu 24.04+).
+
 ## [0.3.0]
 
 ### Added

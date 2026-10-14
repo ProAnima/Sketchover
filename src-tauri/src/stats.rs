@@ -51,10 +51,19 @@ pub fn start(app: &AppHandle) {
                     "arch": std::env::consts::ARCH,
                     "events": [{ "kind": kind }],
                 });
-                let sent = tauri::async_runtime::block_on(client.post(ENDPOINT).json(&body).send());
+                let request = client.post(ENDPOINT).json(&body);
+                // reqwest работает только внутри рантайма Tokio: в простом потоке block_on
+                // запроса паникует («no reactor running»). Запрос — задачей рантайма Tauri,
+                // поток лишь ждёт её.
+                let sent =
+                    tauri::async_runtime::block_on(tauri::async_runtime::spawn(async move {
+                        request.send().await?.error_for_status()
+                    }));
                 // Нет сети — не беда: следующий пульс через 5 минут.
-                if let Err(e) = sent.and_then(|r| r.error_for_status()) {
-                    eprintln!("Статистика не отправлена: {e}");
+                match sent {
+                    Ok(Ok(_)) => {}
+                    Ok(Err(e)) => eprintln!("Статистика не отправлена: {e}"),
+                    Err(e) => eprintln!("Статистика не отправлена: {e}"),
                 }
                 kind = "heartbeat";
             }
