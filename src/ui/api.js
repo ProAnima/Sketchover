@@ -9,6 +9,7 @@ export const api = {
   setAutostart: (enabled) => invoke('set_autostart', { enabled }),
   setAutoUpdate: (enabled) => invoke('set_auto_update', { enabled }),
   setShareStats: (enabled) => invoke('set_share_stats', { enabled }),
+  setKeys: (keys) => invoke('set_keys', { keys }),
   setPassThrough: (enabled, panel) => invoke('set_pass_through', { enabled, panel }),
   focus: () => invoke('focus_window'),
   hide: () => invoke('hide_overlay'),

@@ -5,6 +5,8 @@ import { initToolbar, relabelToolbar } from './ui/toolbar.js';
 import { initHelp, renderHelp } from './ui/help.js';
 import { setPlatform, formatKeys } from './ui/keys.js';
 import { initKeyboard } from './ui/keyboard.js';
+import { initShortcuts, onShortcutsChange } from './ui/shortcuts.js';
+import { initKeysSettings, renderKeys } from './ui/keys-settings.js';
 import { initPointer } from './ui/pointer.js';
 import { initSettings } from './ui/settings.js';
 import { initScreenshot, cancelScreenshot } from './ui/screenshot.js';
@@ -19,12 +21,17 @@ const tools = createTools({ render, edit: editText });
 const info = await api.getSettings();
 
 setPlatform(info.os);
+// Клавиши — до панели и памятки: их подписи показывают текущие назначения.
+initShortcuts(tools, info.keys, { onSave: (keys) => api.setKeys(keys).catch((e) => showToast(String(e))) });
 initToolbar(tools);
 initHelp(tools, info);
-initSettings(info, { relabel: () => { relabelToolbar(); renderHelp(); } });
+initKeysSettings();
+const relabel = () => { relabelToolbar(); renderHelp(); renderKeys(); };
+onShortcutsChange(relabel);
+initSettings(info, { relabel });
 // Скриншот сразу выделен: его можно двигать, тянуть за угол и вращать.
 initScreenshot({ placed: (shape) => { selectTool('select'); state.sel = shape.id; render(); } });
-initKeyboard(tools);
+initKeyboard();
 initPointer(tools);
 addEventListener('resize', resize);
 api.on('overlay:show', () => {

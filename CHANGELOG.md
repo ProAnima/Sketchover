@@ -2,6 +2,11 @@
 
 All notable changes to Sketchover. The release workflow takes the notes for each version from this file.
 
+## [0.4.0]
+
+### Added
+- Every canvas key can be changed: Settings → *Canvas keys* → click a key and press the new one. A key already in use moves to the new action; reset one key or all of them. The cheat sheet and toolbar tooltips show your keys. Holding and double-tapping `Alt` stay as they are.
+
 ## [0.3.0]
 
 ### Added

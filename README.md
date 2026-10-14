@@ -30,7 +30,7 @@ Sketchover puts a transparent canvas over every window. Press one hotkey on a Zo
 - **Region screenshots**: press `S`, select part of the screen, and it lands on the canvas — move it, resize it, rotate it.
 - **Paste into the chat**: `Ctrl+Shift+C` copies your drawing as an image — paste it into Zoom, Teams, Slack or Telegram.
 - **Save and keep editing**: `Ctrl+S` saves a PNG that opens anywhere and still contains the editable canvas — open it later with `Ctrl+O`.
-- **Keyboard first, layout independent**: `1`…`0` pick tools, `Alt+1…8` colors, `Shift+1…3` stroke width, `F1` shows a cheat sheet.
+- **Keyboard first, layout independent**: `1`…`0` pick tools, `Alt+1…8` colors, `Shift+1…3` stroke width, `F1` shows a cheat sheet — and every canvas key can be changed in Settings.
 - **Always ready, never in the way**: starts with your system and waits in the tray; one global hotkey (`` Alt+` ``, configurable) opens it on the monitor under your cursor.
 - **Small and private**: a ~3 MB installer, no account; only an anonymous update check and anonymous usage statistics leave your computer, and the statistics can be turned off.
 - **11 languages**: English, Русский, Deutsch, Español, Français, Português, 中文, 日本語, 한국어, العربية, हिन्दी.
@@ -70,6 +70,8 @@ Sketchover opens the canvas right after install — press `` Alt+` `` (the key l
 | Save / open (PNG with the editable canvas inside) | `Ctrl+S` / `Ctrl+O` |
 | Delete selected / clear all | `Delete` / `Shift+Delete` |
 | Edit a text block | double-click it with any tool |
+
+These are the defaults. To change a key: Settings (⚙) → **Canvas keys** → click the key and press the new one (`Esc` cancels). A key already in use moves to the new action; ↺ brings one key back, *Reset all keys* brings them all. Keys follow the physical key, so they work on any keyboard layout; on macOS, `Ctrl` in the table means `⌘`. Holding and double-tapping `Alt` are fixed.
 | Cheat sheet | `F1` |
 
 Viewers see your drawing when you share the **entire screen**, not a single window.

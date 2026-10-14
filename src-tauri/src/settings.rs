@@ -1,5 +1,6 @@
 //! Настройки пользователя: JSON в каталоге конфигурации приложения.
 
+use std::collections::BTreeMap;
 use std::fs;
 use std::path::PathBuf;
 use std::sync::Mutex;
@@ -15,6 +16,43 @@ const LEGACY_HOTKEY: &str = "CommandOrControl+Alt+D";
 pub const LANGS: [&str; 11] = [
     "ru", "en", "de", "es", "fr", "pt", "zh", "ja", "ko", "ar", "hi",
 ];
+/// Переназначенных клавиш холста не больше — действий в интерфейсе меньше.
+const MAX_KEYS: usize = 64;
+/// Сочетаний у одного действия не больше.
+const MAX_COMBOS: usize = 4;
+const MODIFIERS: [&str; 4] = ["Mod", "Ctrl", "Alt", "Shift"];
+
+/// Сочетание из `src/core/keymap.js`: «Mod+Shift+KeyC» — модификаторы без повторов и
+/// физическая клавиша (`e.code`).
+fn valid_combo(combo: &str) -> bool {
+    let mut parts: Vec<&str> = combo.split('+').collect();
+    let Some(code) = parts.pop() else {
+        return false;
+    };
+    let code_ok = (1..=24).contains(&code.len()) && code.bytes().all(|b| b.is_ascii_alphanumeric());
+    let mut seen = Vec::new();
+    let mods_ok = parts.iter().all(|m| {
+        let fresh = MODIFIERS.contains(m) && !seen.contains(m);
+        seen.push(*m);
+        fresh
+    });
+    code_ok && mods_ok
+}
+
+/// Действие (`undo`, `tool.pen`, `color.3`) и его сочетания через запятую; «» — без клавиши.
+/// Какие действия есть, знает интерфейс; здесь — только форма, чтобы в файл не попал мусор.
+pub fn valid_key(action: &str, combos: &str) -> bool {
+    let action_ok = (1..=32).contains(&action.len())
+        && action
+            .bytes()
+            .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'.');
+    let list: Vec<&str> = combos.split(',').filter(|c| !c.is_empty()).collect();
+    action_ok && list.len() <= MAX_COMBOS && list.iter().all(|c| valid_combo(c))
+}
+
+pub fn valid_keys(keys: &BTreeMap<String, String>) -> bool {
+    keys.len() <= MAX_KEYS && keys.iter().all(|(a, c)| valid_key(a, c))
+}
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
@@ -29,6 +67,8 @@ pub struct Settings {
     pub install_id: String,
     /// Автозапуск по умолчанию уже включали. Дальше решает пользователь: выключил — не включаем снова.
     pub autostart_default_applied: bool,
+    /// Переназначенные клавиши холста — только отличия от значений по умолчанию.
+    pub keys: BTreeMap<String, String>,
 }
 
 impl Default for Settings {
@@ -40,6 +80,7 @@ impl Default for Settings {
             share_stats: true,
             install_id: String::new(),
             autostart_default_applied: false,
+            keys: BTreeMap::new(),
         }
     }
 }
@@ -55,6 +96,12 @@ impl Settings {
         }
         if uuid::Uuid::parse_str(&self.install_id).is_err() {
             self.install_id = uuid::Uuid::new_v4().to_string();
+        }
+        if !valid_keys(&self.keys) {
+            self.keys.retain(|a, c| valid_key(a, c));
+            if self.keys.len() > MAX_KEYS {
+                self.keys.clear();
+            }
         }
         self
     }
@@ -129,6 +176,27 @@ mod tests {
             "статистика включена и у старых настроек без этого поля"
         );
         assert!(!s.autostart_default_applied);
+        assert!(s.keys.is_empty());
+    }
+
+    #[test]
+    fn canvas_keys_keep_only_valid_entries() {
+        assert!(valid_key("redo", "Mod+KeyY,Mod+Shift+KeyZ"));
+        assert!(valid_key("tool.pen", "Digit2"));
+        assert!(valid_key("delete", ""), "без клавиши");
+        assert!(!valid_key("Undo", "Mod+KeyZ"), "имя действия — строчными");
+        assert!(!valid_key("undo", "Mod+Mod+KeyZ"), "модификатор дважды");
+        assert!(!valid_key("undo", "Hyper+KeyZ"));
+        assert!(!valid_key("undo", "Mod+"));
+        assert!(!valid_key("undo", "Mod+Key Z"));
+        assert!(!valid_key("undo", "A,B,C,D,E"), "больше четырёх сочетаний");
+        let s: Settings = serde_json::from_str(
+            r#"{"keys":{"shot":"KeyP","bad action":"KeyQ","undo":"<script>"}}"#,
+        )
+        .unwrap();
+        let s = s.sanitize();
+        assert_eq!(s.keys.len(), 1);
+        assert_eq!(s.keys["shot"], "KeyP");
     }
 
     #[test]

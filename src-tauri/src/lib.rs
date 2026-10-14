@@ -12,6 +12,8 @@ mod stats;
 mod tray;
 mod updates;
 
+use std::collections::BTreeMap;
+
 use serde::Serialize;
 use tauri::{AppHandle, Manager, State, WebviewWindow};
 use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
@@ -34,6 +36,7 @@ struct AppInfo {
     autostart: bool,
     auto_update: bool,
     share_stats: bool,
+    keys: BTreeMap<String, String>,
     /// Работает ли удержание Alt для сквозных кликов на этой системе.
     hold_supported: bool,
 }
@@ -50,6 +53,7 @@ fn get_settings(app: AppHandle, store: State<Store>, status: State<hotkey::Statu
         autostart: app.autolaunch().is_enabled().unwrap_or(false),
         auto_update: s.auto_update,
         share_stats: s.share_stats,
+        keys: s.keys,
         hold_supported: keys::poll().is_some(),
     }
 }
@@ -101,6 +105,16 @@ fn set_auto_update(store: State<Store>, enabled: bool) {
 #[tauri::command]
 fn set_share_stats(store: State<Store>, enabled: bool) {
     store.update(|s| s.share_stats = enabled);
+}
+
+/// Переназначенные клавиши холста целиком; интерфейсу не доверяем — проверяем форму.
+#[tauri::command]
+fn set_keys(store: State<Store>, keys: BTreeMap<String, String>) -> Result<(), String> {
+    if !settings::valid_keys(&keys) {
+        return Err("invalid".into());
+    }
+    store.update(|s| s.keys = keys);
+    Ok(())
 }
 
 #[tauri::command]
@@ -191,6 +205,7 @@ pub fn run() {
             set_autostart,
             set_auto_update,
             set_share_stats,
+            set_keys,
             set_pass_through,
             focus_window,
             hide_overlay,

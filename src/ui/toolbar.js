@@ -10,6 +10,7 @@ import { undo, redo, clearAll } from './actions.js';
 import { toolIcon } from './icons.js';
 import { takeScreenshot } from './screenshot.js';
 import { copyImage, saveScene, openScene } from './export.js';
+import { keysText, labelOf } from './shortcuts.js';
 
 const COPY = 'M8 3h9a2 2 0 0 1 2 2v11h-2V5H8zM5 7h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 2v10h9V9z';
 const SAVE = 'M5 3h11l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm2 2v4h8V5zm5 8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z';
@@ -18,6 +19,11 @@ const CAMERA = 'M9 4 7.5 6H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2
 
 const $ = (s) => document.querySelector(s);
 const dock = $('#dock');
+// Кнопки панели и их действия в реестре клавиш (shortcuts.js).
+const BUTTON_KEYS = {
+  undo: 'undo', redo: 'redo', clear: 'clear', mode: 'pass', 'help-toggle': 'help',
+  'shot-btn': 'shot', 'copy-btn': 'copy', 'save-btn': 'save', 'open-btn': 'open',
+};
 let tools = [];
 
 function button(className, onClick) {
@@ -56,9 +62,11 @@ function refreshToolbar() {
 
 // Подсказки с параметрами (клавиша, номер) — их нельзя задать статично в разметке.
 export function relabelToolbar() {
-  tools.forEach((tool, i) => { $(`[data-tool="${tool.id}"]`).title = `${t(tool.label)} (${(i + 1) % 10})`; });
-  COLORS.forEach((c, i) => { $(`[data-color="${c}"]`).title = `${t('toolbar.color', { n: i + 1 })} (Alt+${i + 1})`; });
-  WIDTHS.forEach((w, i) => { $(`[data-width="${w}"]`).title = `${t('toolbar.width', { n: w })} (Shift+${i + 1})`; });
+  tools.forEach((tool) => { $(`[data-tool="${tool.id}"]`).title = `${t(tool.label)} (${keysText(`tool.${tool.id}`)})`; });
+  COLORS.forEach((c, i) => { $(`[data-color="${c}"]`).title = `${t('toolbar.color', { n: i + 1 })} (${keysText(`color.${i + 1}`)})`; });
+  WIDTHS.forEach((w, i) => { $(`[data-width="${w}"]`).title = `${t('toolbar.width', { n: w })} (${keysText(`width.${i + 1}`)})`; });
+  // Кнопки с клавишами: подпись из словаря, клавиша — текущая.
+  for (const [id, action] of Object.entries(BUTTON_KEYS)) $(`#${id}`).title = `${labelOf(action)} (${keysText(action)})`;
   relabelMode();
 }
 
