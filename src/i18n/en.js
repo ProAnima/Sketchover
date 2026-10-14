@@ -59,6 +59,8 @@ export default {
   'update.auto': 'Check on startup',
   'settings.stats': 'Send anonymous usage statistics',
   'settings.keys': 'Canvas keys',
+  'settings.tap': 'Double-tap for click-through',
+  'settings.tap.off': 'Off',
   'keys.general': 'General',
   'keys.delete': 'Delete selected',
   'keys.reset': 'Reset all keys',

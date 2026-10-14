@@ -5,7 +5,11 @@ All notable changes to Sketchover. The release workflow takes the notes for each
 ## [0.4.0]
 
 ### Added
-- Every canvas key can be changed: Settings → *Canvas keys* → click a key and press the new one. A key already in use moves to the new action; reset one key or all of them. The cheat sheet and toolbar tooltips show your keys. Holding and double-tapping `Alt` stay as they are.
+- Every canvas key can be changed: Settings → *Canvas keys* → click a key and press the new one. A key already in use moves to the new action; reset one key or all of them. The cheat sheet and toolbar tooltips show your keys.
+- Choose the double-tap key for click-through in Settings: `Alt`, `Ctrl`, `Shift`, `⌘` (macOS) or off.
+
+### Changed
+- macOS: double-tap `⌘` toggles click-through by default instead of `⌥` — double `⌥` opens other apps (Claude's quick entry, for one). Holding `⌥` still sends the mouse to the windows below.
 
 ## [0.3.0]
 

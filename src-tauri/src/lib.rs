@@ -37,6 +37,7 @@ struct AppInfo {
     auto_update: bool,
     share_stats: bool,
     keys: BTreeMap<String, String>,
+    tap_key: String,
     /// Работает ли удержание Alt для сквозных кликов на этой системе.
     hold_supported: bool,
 }
@@ -54,7 +55,8 @@ fn get_settings(app: AppHandle, store: State<Store>, status: State<hotkey::Statu
         auto_update: s.auto_update,
         share_stats: s.share_stats,
         keys: s.keys,
-        hold_supported: keys::poll().is_some(),
+        tap_key: s.tap_key,
+        hold_supported: keys::poll(keys::Tap::Off).is_some(),
     }
 }
 
@@ -114,6 +116,18 @@ fn set_keys(store: State<Store>, keys: BTreeMap<String, String>) -> Result<(), S
         return Err("invalid".into());
     }
     store.update(|s| s.keys = keys);
+    Ok(())
+}
+
+#[tauri::command]
+fn set_tap_key(
+    store: State<Store>,
+    clicks: State<overlay::ClickThrough>,
+    key: String,
+) -> Result<(), String> {
+    let tap = keys::Tap::parse(&key).ok_or("invalid")?;
+    clicks.set_tap(tap);
+    store.update(|s| s.tap_key = key);
     Ok(())
 }
 
@@ -184,6 +198,8 @@ pub fn run() {
             let handle = app.handle();
             let store = Store::load(handle);
             let accelerator = store.get().hotkey;
+            app.state::<overlay::ClickThrough>()
+                .set_tap(keys::Tap::parse(&store.get().tap_key).unwrap_or_default());
             app.manage(store);
             overlay::create(handle)?;
             app.manage(tray::create(handle)?);
@@ -206,6 +222,7 @@ pub fn run() {
             set_auto_update,
             set_share_stats,
             set_keys,
+            set_tap_key,
             set_pass_through,
             focus_window,
             hide_overlay,

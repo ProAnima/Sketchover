@@ -59,6 +59,8 @@ export default {
   'update.auto': '起動時に確認',
   'settings.stats': '匿名の利用統計を送信',
   'settings.keys': 'キャンバスのキー',
+  'settings.tap': 'ダブルタップでクリック透過',
+  'settings.tap.off': 'オフ',
   'keys.general': '一般',
   'keys.delete': '選択を削除',
   'keys.reset': 'すべてのキーをリセット',

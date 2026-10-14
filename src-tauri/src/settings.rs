@@ -8,6 +8,8 @@ use std::sync::Mutex;
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Manager};
 
+use crate::keys::Tap;
+
 /// Две клавиши, слева сверху, рядом с Esc (на русской раскладке — Ё).
 pub const DEFAULT_HOTKEY: &str = "Alt+Backquote";
 /// Прежнее значение по умолчанию — переводим на новое, пользователь его не выбирал.
@@ -69,6 +71,8 @@ pub struct Settings {
     pub autostart_default_applied: bool,
     /// Переназначенные клавиши холста — только отличия от значений по умолчанию.
     pub keys: BTreeMap<String, String>,
+    /// Клавиша двойного тапа — `keys::Tap` по имени (`off`, `alt`, `ctrl`, `shift`, `cmd`).
+    pub tap_key: String,
 }
 
 impl Default for Settings {
@@ -81,6 +85,7 @@ impl Default for Settings {
             install_id: String::new(),
             autostart_default_applied: false,
             keys: BTreeMap::new(),
+            tap_key: Tap::DEFAULT.name().into(),
         }
     }
 }
@@ -96,6 +101,9 @@ impl Settings {
         }
         if uuid::Uuid::parse_str(&self.install_id).is_err() {
             self.install_id = uuid::Uuid::new_v4().to_string();
+        }
+        if Tap::parse(&self.tap_key).is_none() {
+            self.tap_key = Tap::DEFAULT.name().into();
         }
         if !valid_keys(&self.keys) {
             self.keys.retain(|a, c| valid_key(a, c));
@@ -177,6 +185,7 @@ mod tests {
         );
         assert!(!s.autostart_default_applied);
         assert!(s.keys.is_empty());
+        assert_eq!(s.tap_key, Tap::DEFAULT.name());
     }
 
     #[test]

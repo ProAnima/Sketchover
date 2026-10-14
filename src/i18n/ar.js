@@ -59,6 +59,8 @@ export default {
   'update.auto': 'التحقق عند التشغيل',
   'settings.stats': 'إرسال إحصاءات استخدام مجهولة',
   'settings.keys': 'مفاتيح اللوحة',
+  'settings.tap': 'النقر المزدوج لتمرير النقرات',
+  'settings.tap.off': 'إيقاف',
   'keys.general': 'عام',
   'keys.delete': 'حذف المحدد',
   'keys.reset': 'إعادة ضبط كل المفاتيح',

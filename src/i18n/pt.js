@@ -59,6 +59,8 @@ export default {
   'update.auto': 'Verificar ao iniciar',
   'settings.stats': 'Enviar estatísticas de uso anônimas',
   'settings.keys': 'Teclas da tela',
+  'settings.tap': 'Toque duplo para cliques através',
+  'settings.tap.off': 'Desligado',
   'keys.general': 'Geral',
   'keys.delete': 'Excluir a seleção',
   'keys.reset': 'Redefinir todas as teclas',

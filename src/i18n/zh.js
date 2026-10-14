@@ -59,6 +59,8 @@ export default {
   'update.auto': '启动时检查',
   'settings.stats': '发送匿名使用统计',
   'settings.keys': '画布快捷键',
+  'settings.tap': '双击切换点击穿透',
+  'settings.tap.off': '关闭',
   'keys.general': '通用',
   'keys.delete': '删除所选',
   'keys.reset': '重置所有快捷键',

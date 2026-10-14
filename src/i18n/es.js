@@ -59,6 +59,8 @@ export default {
   'update.auto': 'Comprobar al iniciar',
   'settings.stats': 'Enviar estadísticas de uso anónimas',
   'settings.keys': 'Teclas del lienzo',
+  'settings.tap': 'Doble toque para clics a través',
+  'settings.tap.off': 'Desactivado',
   'keys.general': 'General',
   'keys.delete': 'Eliminar la selección',
   'keys.reset': 'Restablecer todas las teclas',

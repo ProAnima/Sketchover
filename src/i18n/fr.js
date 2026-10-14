@@ -59,6 +59,8 @@ export default {
   'update.auto': 'Vérifier au démarrage',
   'settings.stats': 'Envoyer des statistiques d’utilisation anonymes',
   'settings.keys': 'Touches du canevas',
+  'settings.tap': 'Double appui pour les clics traversants',
+  'settings.tap.off': 'Désactivé',
   'keys.general': 'Général',
   'keys.delete': 'Supprimer la sélection',
   'keys.reset': 'Réinitialiser toutes les touches',

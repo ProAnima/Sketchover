@@ -24,7 +24,7 @@ Sketchover puts a transparent canvas over every window. Press one hotkey on a Zo
 ## Features
 
 - **Draw on top of any app**: brush, line, arrow, rectangle, ellipse, text and a fading laser pointer.
-- **Click-through**: hold `Alt` to click and scroll the windows below; double-tap `Alt` to stay in click-through mode. The drawing stays, semi-transparent.
+- **Click-through**: hold `Alt` to click and scroll the windows below; double-tap `Alt` (`⌘` on macOS) to stay in click-through mode. The drawing stays, semi-transparent.
 - **Text blocks with Markdown**: headings, bullet and numbered lists (they continue on `Enter`), **bold**, *italic*, `code`, ~~strikethrough~~.
 - **Arrows that stick**: arrows attach to text blocks and screenshots and follow them when you move them.
 - **Region screenshots**: press `S`, select part of the screen, and it lands on the canvas — move it, resize it, rotate it.
@@ -61,7 +61,7 @@ Sketchover opens the canvas right after install — press `` Alt+` `` (the key l
 |---|---|
 | Show the canvas / drawing ⇄ click-through | `` Alt+` `` (global, configurable) |
 | Mouse to the windows below while held | hold `Alt` (`⌥` on macOS; Windows and macOS) |
-| Click-through on / off | double-tap `Alt` (Windows, macOS); `Esc`, the mode button or the global hotkey |
+| Click-through on / off | double-tap `Alt` on Windows, `⌘` on macOS (the key is chosen in Settings); `Esc`, the mode button or the global hotkey |
 | Tools | `1` select, `2` brush, `3` line, `4` arrow, `5` rectangle, `6` ellipse, `7` text block, `8` text, `9` laser, `0` eraser |
 | Region screenshot | `S` |
 | Color / stroke width | `Alt+1…8` / `Shift+1…3` |
@@ -71,7 +71,7 @@ Sketchover opens the canvas right after install — press `` Alt+` `` (the key l
 | Delete selected / clear all | `Delete` / `Shift+Delete` |
 | Edit a text block | double-click it with any tool |
 
-These are the defaults. To change a key: Settings (⚙) → **Canvas keys** → click the key and press the new one (`Esc` cancels). A key already in use moves to the new action; ↺ brings one key back, *Reset all keys* brings them all. Keys follow the physical key, so they work on any keyboard layout; on macOS, `Ctrl` in the table means `⌘`. Holding and double-tapping `Alt` are fixed.
+These are the defaults. To change a key: Settings (⚙) → **Canvas keys** → click the key and press the new one (`Esc` cancels). A key already in use moves to the new action; ↺ brings one key back, *Reset all keys* brings them all. Keys follow the physical key, so they work on any keyboard layout; on macOS, `Ctrl` in the table means `⌘`. Holding `Alt` is fixed. The double-tap key is chosen in Settings — `Alt`, `Ctrl`, `Shift`, `⌘` (macOS) or off; on macOS it is `⌘` by default, because double `⌥` already opens other apps (Claude's quick entry, for one).
 | Cheat sheet | `F1` |
 
 Viewers see your drawing when you share the **entire screen**, not a single window.
@@ -90,7 +90,7 @@ If you are looking for an **Epic Pen, ZoomIt, gInk, ppInk or Presentify alternat
 
 **How do I keep a drawing?** `Ctrl+S` saves a regular PNG — it opens in any image viewer — with the canvas embedded, so `Ctrl+O` brings it back fully editable. Or `Ctrl+Shift+C` and paste it straight into the chat.
 
-**Is everything the same on Linux?** Almost: holding or double-tapping `Alt` is Windows and macOS only for now. On Linux, switch click-through with `Esc`, the mode button or the global hotkey.
+**Is everything the same on Linux?** Almost: holding `Alt` and the double tap are Windows and macOS only for now. On Linux, switch click-through with `Esc`, the mode button or the global hotkey.
 
 ## Build from source
 

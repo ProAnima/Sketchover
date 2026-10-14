@@ -15,6 +15,12 @@ const NAMES = {
 };
 
 export const formatModifier = (name) => NAMES[name]();
+
+// Клавиша двойного тапа из настроек (keys::Tap в Rust) → модификатор для показа.
+const TAP_KEYS = { alt: 'Alt', ctrl: 'Ctrl', shift: 'Shift', cmd: 'Mod' };
+/** Какие клавиши можно выбрать для тапа: ⌘ — только на macOS (Win на Windows держит система). */
+export const tapKeys = () => Object.keys(TAP_KEYS).filter((k) => k !== 'cmd' || mac);
+export const formatTap = (tap) => formatModifier(TAP_KEYS[tap]);
 export const formatKeys = (accel) => accel.split('+').map((p) => (NAMES[p] ? NAMES[p]() : p)).join(' + ');
 
 // Названия физических клавиш (e.code) — как на клавиатуре.

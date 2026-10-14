@@ -59,6 +59,8 @@ export default {
   'update.auto': 'Проверять при запуске',
   'settings.stats': 'Отправлять анонимную статистику',
   'settings.keys': 'Клавиши холста',
+  'settings.tap': 'Двойной тап — сквозной режим',
+  'settings.tap.off': 'Выкл.',
   'keys.general': 'Общие',
   'keys.delete': 'Удалить выделенное',
   'keys.reset': 'Сбросить все клавиши',

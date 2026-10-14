@@ -1,5 +1,5 @@
 //! Окно-оверлей: показ на мониторе с курсором, сквозные клики (режим, удержание Alt,
-//! двойной тап Alt) с кликабельной панелью.
+//! двойной тап выбранной клавиши) с кликабельной панелью.
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Mutex, MutexGuard, OnceLock};
@@ -14,7 +14,7 @@ use crate::keys;
 pub const LABEL: &str = "overlay";
 /// Как часто, пока холст виден, проверяем Alt и курсор: ~30 раз в секунду незаметно глазу и почти не грузит CPU.
 const POLL: Duration = Duration::from_millis(33);
-/// Тап — Alt отпущен не позже, чем через столько после нажатия.
+/// Тап — клавиша отпущена не позже, чем через столько после нажатия.
 const TAP_MAX: Duration = Duration::from_millis(300);
 /// Двойной тап — второй тап не позже, чем через столько после первого.
 const DOUBLE_TAP_GAP: Duration = Duration::from_millis(400);
@@ -50,25 +50,27 @@ struct State {
     panel: Rect,
     /// Что сейчас выставлено окну; `None` — неизвестно, выставить заново.
     ignoring: Option<bool>,
-    /// Когда зажали Alt и нажималось ли вместе с ним что-то ещё (тогда это комбинация, не тап).
-    alt_since: Option<Instant>,
-    alt_combo: bool,
+    /// Клавиша двойного тапа (из настроек).
+    tap: keys::Tap,
+    /// Когда её зажали и нажималось ли вместе с ней что-то ещё (тогда это комбинация, не тап).
+    tap_since: Option<Instant>,
+    tap_combo: bool,
     /// Когда закончился предыдущий тап.
     last_tap: Option<Instant>,
 }
 
 impl State {
-    /// Отслеживает тапы Alt; `true` — только что случился двойной тап.
+    /// Отслеживает тапы клавиши тапа; `true` — только что случился двойной тап.
     fn track_taps(&mut self, k: keys::Keys, now: Instant) -> bool {
-        match (k.hold, self.alt_since) {
+        match (k.tap, self.tap_since) {
             (true, None) => {
-                self.alt_since = Some(now);
-                self.alt_combo = k.other;
+                self.tap_since = Some(now);
+                self.tap_combo = k.other;
             }
-            (true, Some(_)) => self.alt_combo |= k.other,
+            (true, Some(_)) => self.tap_combo |= k.other,
             (false, Some(since)) => {
-                self.alt_since = None;
-                let tap = !self.alt_combo && now - since <= TAP_MAX;
+                self.tap_since = None;
+                let tap = !self.tap_combo && now - since <= TAP_MAX;
                 if !tap {
                     self.last_tap = None;
                 } else if self.last_tap.is_some_and(|t| now - t <= DOUBLE_TAP_GAP) {
@@ -103,6 +105,13 @@ impl ClickThrough {
         self.state.lock().unwrap_or_else(|e| e.into_inner())
     }
 
+    pub fn set_tap(&self, tap: keys::Tap) {
+        let mut s = self.lock();
+        s.tap = tap;
+        s.tap_since = None;
+        s.last_tap = None;
+    }
+
     pub fn set_pass(&self, app: &AppHandle, pass: bool, panel: Rect) {
         {
             let mut s = self.lock();
@@ -133,7 +142,7 @@ fn request_sync(app: &AppHandle) {
     let _ = app.run_on_main_thread(move || sync(&handle));
 }
 
-/// Только в главном потоке: сверяет Alt (удержание, двойной тап) и курсор и выставляет окну, пропускать ли мышь.
+/// Только в главном потоке: сверяет удержание Alt, двойной тап и курсор и выставляет окну, пропускать ли мышь.
 fn sync(app: &AppHandle) {
     let Some(win) = app.get_webview_window(LABEL) else {
         return;
@@ -142,12 +151,13 @@ fn sync(app: &AppHandle) {
     let visible = clicks.visible.load(Ordering::Relaxed);
     let mut s = clicks.lock();
 
-    let k = keys::poll().filter(|_| visible).unwrap_or(keys::Keys {
+    let k = keys::poll(s.tap).filter(|_| visible).unwrap_or(keys::Keys {
         hold: false,
+        tap: false,
         other: false,
     });
     if s.track_taps(k, Instant::now()) {
-        // Двойной тап Alt: рисование ⇄ сквозные клики — как глобальный хоткей.
+        // Двойной тап: рисование ⇄ сквозные клики — как глобальный хоткей.
         let _ = app.emit("overlay:toggle", ());
     }
     let held = k.hold;
@@ -287,14 +297,23 @@ mod tests {
 
     const UP: keys::Keys = keys::Keys {
         hold: false,
+        tap: false,
         other: false,
     };
     const ALT: keys::Keys = keys::Keys {
-        hold: true,
+        hold: false,
+        tap: true,
         other: false,
     };
     const ALT_TAB: keys::Keys = keys::Keys {
+        hold: false,
+        tap: true,
+        other: true,
+    };
+    /// Зажат Alt удержания, а клавиша тапа — другая (⌘ на macOS).
+    const HOLD_ONLY: keys::Keys = keys::Keys {
         hold: true,
+        tap: false,
         other: true,
     };
 
@@ -310,6 +329,16 @@ mod tests {
     #[test]
     fn double_tap_toggles() {
         assert!(run(&[(ALT, 0), (UP, 100), (ALT, 250), (UP, 350)]));
+    }
+
+    #[test]
+    fn holding_alt_is_not_a_tap_of_another_key() {
+        assert!(!run(&[
+            (HOLD_ONLY, 0),
+            (UP, 100),
+            (HOLD_ONLY, 250),
+            (UP, 350)
+        ]));
     }
 
     #[test]

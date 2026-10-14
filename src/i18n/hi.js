@@ -59,6 +59,8 @@ export default {
   'update.auto': 'शुरू होने पर जाँचें',
   'settings.stats': 'गुमनाम उपयोग आँकड़े भेजें',
   'settings.keys': 'कैनवास की कुंजियाँ',
+  'settings.tap': 'क्लिक-थ्रू के लिए डबल-टैप',
+  'settings.tap.off': 'बंद',
   'keys.general': 'सामान्य',
   'keys.delete': 'चुना हुआ हटाएँ',
   'keys.reset': 'सभी कुंजियाँ रीसेट करें',

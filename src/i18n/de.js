@@ -59,6 +59,8 @@ export default {
   'update.auto': 'Beim Start prüfen',
   'settings.stats': 'Anonyme Nutzungsstatistik senden',
   'settings.keys': 'Tasten der Zeichenfläche',
+  'settings.tap': 'Doppeltippen für Durchklicken',
+  'settings.tap.off': 'Aus',
   'keys.general': 'Allgemein',
   'keys.delete': 'Auswahl löschen',
   'keys.reset': 'Alle Tasten zurücksetzen',

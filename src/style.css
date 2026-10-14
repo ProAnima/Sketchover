@@ -37,6 +37,7 @@ body.mode-pass #mode { background: rgba(52, 199, 89, .85); }
 #settings[hidden] { display: none; }
 #settings h3 { margin: 6px 0 0; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; opacity: .55; }
 #settings .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 28px; }
+#settings .row[hidden] { display: none; }
 #settings .check { justify-content: flex-start; cursor: pointer; }
 #settings input[type="checkbox"] { margin: 0; accent-color: #0a84ff; }
 #settings select { background: #2c2c32; color: #eee; border: 0; border-radius: 6px; padding: 4px 6px; font: inherit; }

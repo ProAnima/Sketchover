@@ -59,6 +59,8 @@ export default {
   'update.auto': '시작할 때 확인',
   'settings.stats': '익명 사용 통계 보내기',
   'settings.keys': '캔버스 키',
+  'settings.tap': '두 번 눌러 클릭 통과',
+  'settings.tap.off': '끄기',
   'keys.general': '일반',
   'keys.delete': '선택 항목 삭제',
   'keys.reset': '모든 키 초기화',

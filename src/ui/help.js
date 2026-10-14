@@ -1,7 +1,7 @@
 // Памятка по клавишам сбоку экрана. Открыта по умолчанию, F1 или «?» — свернуть/развернуть.
 import { digitRun } from '../core/keymap.js';
 import { t } from '../i18n/index.js';
-import { formatKeys, formatCombo, formatModifier } from './keys.js';
+import { formatKeys, formatCombo, formatModifier, formatTap } from './keys.js';
 import { toolIcon } from './icons.js';
 import { allActions, combosOf } from './shortcuts.js';
 
@@ -42,8 +42,8 @@ export function renderHelp() {
   aside.replaceChildren(el('h3', null, t('help.title')));
   aside.append(row(formatKeys(info.hotkey), t('help.toggle')));
   if (info.holdSupported) aside.append(row(`${formatKeys('Alt')} (${t('help.hold')})`, t('help.peek')));
-  const alt = formatKeys('Alt');
-  aside.append(row(info.holdSupported ? `${firstKey('pass')} · ${alt} ${alt}` : firstKey('pass'), t('help.pass')));
+  const tap = info.holdSupported && info.tapKey !== 'off' ? formatTap(info.tapKey) : null;
+  aside.append(row(tap ? `${firstKey('pass')} · ${tap} ${tap}` : firstKey('pass'), t('help.pass')));
 
   aside.append(el('h4', null, t('help.tools')));
   const grid = el('div', 'help-tools');
