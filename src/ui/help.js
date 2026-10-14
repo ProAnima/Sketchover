@@ -1,8 +1,9 @@
 // Памятка по клавишам сбоку экрана. Открыта по умолчанию, F1 или «?» — свернуть/развернуть.
-import { COLORS, WIDTHS } from '../core/state.js';
+import { digitRun } from '../core/keymap.js';
 import { t } from '../i18n/index.js';
-import { formatKeys } from './keys.js';
+import { formatKeys, formatCombo, formatModifier, formatTap } from './keys.js';
 import { toolIcon } from './icons.js';
+import { allActions, combosOf } from './shortcuts.js';
 
 const aside = document.querySelector('#help');
 const toggle = document.querySelector('#help-toggle');
@@ -24,33 +25,44 @@ function row(keys, label) {
   return r;
 }
 
-// Клавиши инструментов — по порядку панели: 1…9, затем 0.
-const toolKey = (i) => String((i + 1) % 10);
+// Группа действий (цвета, толщины) одной строкой: «Alt + 1…8», если клавиши идут подряд,
+// иначе — через «·». Первая клавиша каждого действия: так в памятке не тесно.
+function groupKeys(group) {
+  const combos = allActions().filter((a) => a.group === group).map((a) => combosOf(a.id)[0]);
+  const run = combos.every(Boolean) && digitRun(combos);
+  if (run) return [...run.prefix.map(formatModifier), `1…${run.last}`].join(' + ');
+  return combos.map((c) => (c ? formatCombo(c) : '—')).join(' · ');
+}
+
+// В памятке — первая клавиша действия: вторые («Ctrl + Shift + Z» для повтора) не помещаются.
+const firstKey = (id) => (combosOf(id)[0] ? formatCombo(combosOf(id)[0]) : '—');
+const pair = (a, b) => `${firstKey(a)} · ${firstKey(b)}`;
 
 export function renderHelp() {
   aside.replaceChildren(el('h3', null, t('help.title')));
   aside.append(row(formatKeys(info.hotkey), t('help.toggle')));
   if (info.holdSupported) aside.append(row(`${formatKeys('Alt')} (${t('help.hold')})`, t('help.peek')));
-  const alt = formatKeys('Alt');
-  aside.append(row(info.holdSupported ? `Esc · ${alt} ${alt}` : 'Esc', t('help.pass')));
+  const tap = info.holdSupported && info.tapKey !== 'off' ? formatTap(info.tapKey) : null;
+  aside.append(row(tap ? `${firstKey('pass')} · ${tap} ${tap}` : firstKey('pass'), t('help.pass')));
 
   aside.append(el('h4', null, t('help.tools')));
   const grid = el('div', 'help-tools');
-  tools.forEach((tool, i) => {
+  tools.forEach((tool) => {
     const chip = el('span', 'help-tool');
     chip.title = t(tool.label);
-    chip.append(el('kbd', null, toolKey(i)), toolIcon(tool));
+    const combo = combosOf(`tool.${tool.id}`)[0];
+    chip.append(el('kbd', null, combo ? formatCombo(combo) : '—'), toolIcon(tool));
     grid.append(chip);
   });
   aside.append(grid);
 
-  aside.append(row('S', t('help.shot')));
-  aside.append(row(`${formatKeys('Alt')} + 1…${COLORS.length}`, t('help.colors')));
-  aside.append(row(`${formatKeys('Shift')} + 1…${WIDTHS.length}`, t('help.widths')));
-  aside.append(row(`${formatKeys('CommandOrControl')} + Z / Y`, t('help.undo')));
-  aside.append(row(`${formatKeys('CommandOrControl')} + ${formatKeys('Shift')} + C`, t('help.copy')));
-  aside.append(row(`${formatKeys('CommandOrControl')} + S / O`, t('help.save')));
-  aside.append(row('Del / Shift + Del', t('help.delete')));
+  aside.append(row(firstKey('shot'), t('help.shot')));
+  aside.append(row(groupKeys('colors'), t('help.colors')));
+  aside.append(row(groupKeys('widths'), t('help.widths')));
+  aside.append(row(pair('undo', 'redo'), t('help.undo')));
+  aside.append(row(firstKey('copy'), t('help.copy')));
+  aside.append(row(pair('save', 'open'), t('help.save')));
+  aside.append(row(pair('delete', 'clear'), t('help.delete')));
 }
 
 function setOpen(open) {

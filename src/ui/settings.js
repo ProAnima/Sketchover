@@ -1,7 +1,7 @@
 // Раскрываемая панель: язык, хоткей, автозапуск, обновления, «О программе».
 import { LANGS, lang, setLang, isRtl, t, translatePage } from '../i18n/index.js';
 import { api } from './api.js';
-import { formatKeys, isMac } from './keys.js';
+import { formatKeys, isMac, tapKeys, formatTap } from './keys.js';
 
 const $ = (s) => document.querySelector(s);
 const panel = $('#settings');
@@ -71,6 +71,28 @@ hotkeyButton.addEventListener('keydown', async (e) => {
   }
   stopRecording();
 });
+
+/* ---------- двойной тап ---------- */
+// Клавиша двойного тапа (сквозной режим): на macOS двойной ⌥ занят другими программами,
+// поэтому выбор — здесь. Опрос клавиш есть только в Windows и macOS.
+function buildTapList() {
+  $('#tap-row').hidden = !info.holdSupported;
+  const select = $('#tap-key');
+  const off = new Option('', 'off');
+  off.dataset.i18n = 'settings.tap.off';
+  select.append(off);
+  for (const key of tapKeys()) select.append(new Option(formatTap(key), key));
+  select.value = info.tapKey;
+  select.addEventListener('change', async () => {
+    try {
+      await api.setTapKey(select.value);
+      info.tapKey = select.value;
+      onRelabel();
+    } catch {
+      select.value = info.tapKey;
+    }
+  });
+}
 
 /* ---------- язык ---------- */
 function applyLanguage() {
@@ -166,6 +188,7 @@ export function initSettings(appInfo, { relabel }) {
   onRelabel = relabel;
   setLang(info.lang);
   buildLanguageList();
+  buildTapList();
 
   $('#autostart').checked = info.autostart;
   $('#autostart').addEventListener('change', (e) => {
