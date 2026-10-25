@@ -1,9 +1,8 @@
 // Памятка по клавишам сбоку экрана. Открыта по умолчанию, F1 или «?» — свернуть/развернуть.
-import { digitRun } from '../core/keymap.js';
 import { t } from '../i18n/index.js';
-import { formatKeys, formatCombo, formatModifier, formatTap } from './keys.js';
+import { formatKeys, formatCombo, formatTap } from './keys.js';
 import { toolIcon } from './icons.js';
-import { allActions, combosOf } from './shortcuts.js';
+import { combosOf, firstKeyText as firstKey, groupKeysText as groupKeys } from './shortcuts.js';
 
 const aside = document.querySelector('#help');
 const toggle = document.querySelector('#help-toggle');
@@ -25,17 +24,6 @@ function row(keys, label) {
   return r;
 }
 
-// Группа действий (цвета, толщины) одной строкой: «Alt + 1…8», если клавиши идут подряд,
-// иначе — через «·». Первая клавиша каждого действия: так в памятке не тесно.
-function groupKeys(group) {
-  const combos = allActions().filter((a) => a.group === group).map((a) => combosOf(a.id)[0]);
-  const run = combos.every(Boolean) && digitRun(combos);
-  if (run) return [...run.prefix.map(formatModifier), `1…${run.last}`].join(' + ');
-  return combos.map((c) => (c ? formatCombo(c) : '—')).join(' · ');
-}
-
-// В памятке — первая клавиша действия: вторые («Ctrl + Shift + Z» для повтора) не помещаются.
-const firstKey = (id) => (combosOf(id)[0] ? formatCombo(combosOf(id)[0]) : '—');
 const pair = (a, b) => `${firstKey(a)} · ${firstKey(b)}`;
 
 export function renderHelp() {

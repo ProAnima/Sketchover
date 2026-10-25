@@ -1,9 +1,9 @@
 // Реестр клавиш холста: какие есть действия, их клавиши по умолчанию и текущие назначения.
 // Обработку нажатий делает keyboard.js, показ — памятка, панель и настройки.
 import { COLORS, WIDTHS } from '../core/state.js';
-import { resolve, toOverrides, assign, lookup } from '../core/keymap.js';
+import { resolve, toOverrides, assign, lookup, digitRun } from '../core/keymap.js';
 import { t } from '../i18n/index.js';
-import { formatCombo } from './keys.js';
+import { formatCombo, formatModifier } from './keys.js';
 
 const GENERAL = [
   { id: 'pass', label: 'toolbar.mode', keys: ['Escape'] },
@@ -60,6 +60,20 @@ export const isDefault = (id) => combosOf(id).join(',') === (defaults[id] ?? [])
 
 /** Клавиши действия для подсказок: «Ctrl + Y / Ctrl + Shift + Z», «—», если нет. */
 export const keysText = (id) => combosOf(id).map(formatCombo).join(' / ') || '—';
+
+// Для памятки и обучения — первая клавиша действия: вторые («Ctrl + Shift + Z» для повтора) не помещаются.
+export const firstKeyText = (id) => (combosOf(id)[0] ? formatCombo(combosOf(id)[0]) : '—');
+
+/**
+ * Группа действий (цвета, толщины) одной строкой: «Alt + 1…8», если клавиши идут подряд,
+ * иначе — через «·».
+ */
+export function groupKeysText(group) {
+  const combos = actions.filter((a) => a.group === group).map((a) => combosOf(a.id)[0]);
+  const run = combos.every(Boolean) && digitRun(combos);
+  if (run) return [...run.prefix.map(formatModifier), `1…${run.last}`].join(' + ');
+  return combos.map((c) => (c ? formatCombo(c) : '—')).join(' · ');
+}
 
 /** Новое сочетание действия. Возвращает действия, у которых его пришлось снять. */
 export function setCombo(id, combo) {
