@@ -89,3 +89,10 @@ export function resetCombo(id) {
 }
 
 export const resetAll = () => store(resolve(defaults, {}));
+
+/** Снять с клавиш холста сочетания, для которых pred(combo) истинно. Возвращает, с каких действий. */
+export function dropWhere(pred) {
+  const moved = Object.keys(bindings).filter((id) => bindings[id].some(pred));
+  if (moved.length) store(Object.fromEntries(Object.entries(bindings).map(([id, list]) => [id, list.filter((c) => !pred(c))])));
+  return moved;
+}

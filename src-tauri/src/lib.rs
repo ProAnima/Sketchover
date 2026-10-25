@@ -25,40 +25,62 @@ use settings::{Store, LANGS};
 /// установки кажется, что ничего не произошло.
 const HIDDEN_ARG: &str = "--hidden";
 
+/// Глобальный хоткей для настроек: сочетание («» — нет) и встало ли оно.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct GlobalKey {
+    accelerator: String,
+    ok: bool,
+}
+
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct AppInfo {
     version: String,
     os: &'static str,
     lang: Option<String>,
+    /// Главный глобальный хоткей — его показывают памятка, обучение и подсказки.
     hotkey: String,
     hotkey_ok: bool,
+    /// Все глобальные хоткеи по действиям: `show`, `mode`, `hide`.
+    globals: BTreeMap<&'static str, GlobalKey>,
     autostart: bool,
     auto_update: bool,
     share_stats: bool,
     keys: BTreeMap<String, String>,
+    hold_key: String,
     tap_key: String,
     onboarded: bool,
-    /// Работает ли удержание Alt для сквозных кликов на этой системе.
+    /// Работают ли удержание и двойной тап на этой системе (опрос клавиш).
     hold_supported: bool,
 }
 
 #[tauri::command]
-fn get_settings(app: AppHandle, store: State<Store>, status: State<hotkey::Status>) -> AppInfo {
+fn get_settings(app: AppHandle, store: State<Store>, hotkeys: State<hotkey::Hotkeys>) -> AppInfo {
     let s = store.get();
+    let globals: BTreeMap<_, _> = hotkey::ACTIONS
+        .into_iter()
+        .map(|a| {
+            let (accelerator, ok) = hotkeys.status(a);
+            (a.name(), GlobalKey { accelerator, ok })
+        })
+        .collect();
+    let (hotkey, hotkey_ok) = hotkeys.status(hotkey::Action::Show);
     AppInfo {
         version: app.package_info().version.to_string(),
         os: std::env::consts::OS,
         lang: s.lang,
-        hotkey: s.hotkey,
-        hotkey_ok: status.ok(),
+        hotkey,
+        hotkey_ok,
+        globals,
         autostart: app.autolaunch().is_enabled().unwrap_or(false),
         auto_update: s.auto_update,
         share_stats: s.share_stats,
         keys: s.keys,
+        hold_key: s.hold_key,
         tap_key: s.tap_key,
         onboarded: s.onboarded,
-        hold_supported: keys::poll(keys::Tap::Off).is_some(),
+        hold_supported: keys::poll(keys::Modifier::Off, keys::Modifier::Off).is_some(),
     }
 }
 
@@ -77,16 +99,22 @@ fn set_language(
     Ok(())
 }
 
+/// Глобальный хоткей действия (`show`, `mode`, `hide`); «» — убрать (кроме `show`).
+/// Ошибка — код для `settings.hotkey.<код>`: `invalid`, `used`, `taken`.
 #[tauri::command]
-fn set_hotkey(
+fn set_global_hotkey(
     app: AppHandle,
     store: State<Store>,
-    status: State<hotkey::Status>,
+    action: String,
     accelerator: String,
 ) -> Result<(), String> {
-    let old = store.get().hotkey;
-    hotkey::replace(&app, &status, Some(&old), &accelerator)?;
-    store.update(|s| s.hotkey = accelerator);
+    let action = hotkey::Action::parse(&action).ok_or("invalid")?;
+    hotkey::set(&app, action, &accelerator)?;
+    store.update(|s| match action {
+        hotkey::Action::Show => s.hotkey = accelerator,
+        hotkey::Action::Mode => s.hotkey_mode = accelerator,
+        hotkey::Action::Hide => s.hotkey_hide = accelerator,
+    });
     Ok(())
 }
 
@@ -132,9 +160,21 @@ fn set_tap_key(
     clicks: State<overlay::ClickThrough>,
     key: String,
 ) -> Result<(), String> {
-    let tap = keys::Tap::parse(&key).ok_or("invalid")?;
+    let tap = keys::Modifier::parse(&key).ok_or("invalid")?;
     clicks.set_tap(tap);
     store.update(|s| s.tap_key = key);
+    Ok(())
+}
+
+#[tauri::command]
+fn set_hold_key(
+    store: State<Store>,
+    clicks: State<overlay::ClickThrough>,
+    key: String,
+) -> Result<(), String> {
+    let hold = keys::Modifier::parse(&key).ok_or("invalid")?;
+    clicks.set_hold(hold);
+    store.update(|s| s.hold_key = key);
     Ok(())
 }
 
@@ -196,7 +236,7 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_clipboard_manager::init())
         .manage(overlay::ClickThrough::default())
-        .manage(hotkey::Status::default())
+        .manage(hotkey::Hotkeys::default())
         .manage(updates::Pending::default())
         .setup(|app| {
             // macOS: приложение трея — без иконки в Dock и без меню приложения.
@@ -204,16 +244,23 @@ pub fn run() {
             app.set_activation_policy(tauri::ActivationPolicy::Accessory);
             let handle = app.handle();
             let store = Store::load(handle);
-            let accelerator = store.get().hotkey;
-            app.state::<overlay::ClickThrough>()
-                .set_tap(keys::Tap::parse(&store.get().tap_key).unwrap_or_default());
+            let saved = store.get();
+            let clicks = app.state::<overlay::ClickThrough>();
+            clicks.set_hold(
+                keys::Modifier::parse(&saved.hold_key).unwrap_or(keys::Modifier::HOLD_DEFAULT),
+            );
+            clicks.set_tap(
+                keys::Modifier::parse(&saved.tap_key).unwrap_or(keys::Modifier::TAP_DEFAULT),
+            );
             app.manage(store);
             overlay::create(handle)?;
             app.manage(tray::create(handle)?);
             // Занятый хоткей не мешает запуску, но без него холст не открыть ничем, кроме трея —
             // поэтому тогда показываем холст и при автозапуске: интерфейс скажет, что делать.
-            let hotkey_ok =
-                hotkey::replace(handle, &app.state::<hotkey::Status>(), None, &accelerator).is_ok();
+            let hotkey_ok = hotkey::init(
+                handle,
+                [&saved.hotkey, &saved.hotkey_mode, &saved.hotkey_hide],
+            );
             enable_autostart_once(handle);
             stats::start(handle);
             if !hotkey_ok || !std::env::args().any(|a| a == HIDDEN_ARG) {
@@ -224,12 +271,13 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             get_settings,
             set_language,
-            set_hotkey,
+            set_global_hotkey,
             set_autostart,
             set_auto_update,
             set_share_stats,
             set_keys,
             set_tap_key,
+            set_hold_key,
             set_onboarded,
             set_pass_through,
             focus_window,

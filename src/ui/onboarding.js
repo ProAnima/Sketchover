@@ -3,7 +3,7 @@
 // (свои назначения, хоткей, клавиша двойного тапа). Пропустить можно на любом шаге;
 // снова пройти — из настроек.
 import { t, isRtl } from '../i18n/index.js';
-import { formatKeys, formatTap, isMac } from './keys.js';
+import { formatKeys, formatModifierKey, isMac } from './keys.js';
 import { firstKeyText, groupKeysText } from './shortcuts.js';
 
 const $ = (s) => document.querySelector(s);
@@ -46,7 +46,8 @@ function withKeys(key, keys) {
 
 // Текст шага с клавишами, которые сейчас действуют на этой системе.
 function stepText(id) {
-  const tap = info.holdSupported && info.tapKey !== 'off' ? formatTap(info.tapKey) : null;
+  const tap = info.holdSupported && info.tapKey !== 'off' ? formatModifierKey(info.tapKey) : null;
+  const hold = info.holdSupported && info.holdKey !== 'off' ? formatModifierKey(info.holdKey) : null;
   const params = {
     tools: `${firstKeyText('tool.select')} … ${firstKeyText('tool.eraser')}`,
     colors: groupKeysText('colors'),
@@ -65,7 +66,7 @@ function stepText(id) {
   const nodes = withKeys(key, params);
   if (id === 'mode') {
     if (tap) nodes.push(document.createTextNode(' '), ...withKeys('tour.mode.tap', { tap: `${tap} ${tap}` }));
-    if (info.holdSupported) nodes.push(document.createTextNode(' '), ...withKeys('tour.mode.hold', { alt: formatKeys('Alt') }));
+    if (hold) nodes.push(document.createTextNode(' '), ...withKeys('tour.mode.hold', { alt: hold }));
   }
   return nodes;
 }

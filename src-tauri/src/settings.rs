@@ -8,7 +8,8 @@ use std::sync::Mutex;
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Manager};
 
-use crate::keys::Tap;
+use crate::hotkey;
+use crate::keys::Modifier;
 
 /// Две клавиши, слева сверху, рядом с Esc (на русской раскладке — Ё).
 pub const DEFAULT_HOTKEY: &str = "Alt+Backquote";
@@ -61,7 +62,11 @@ pub fn valid_keys(keys: &BTreeMap<String, String>) -> bool {
 pub struct Settings {
     /// `None` — язык системы.
     pub lang: Option<String>,
+    /// Главный глобальный хоткей: показать холст / переключить режим.
     pub hotkey: String,
+    /// Необязательные глобальные хоткеи: «» — без клавиши.
+    pub hotkey_mode: String,
+    pub hotkey_hide: String,
     pub auto_update: bool,
     /// Анонимная статистика в хаб (`stats.rs`); человек может выключить.
     pub share_stats: bool,
@@ -71,7 +76,8 @@ pub struct Settings {
     pub autostart_default_applied: bool,
     /// Переназначенные клавиши холста — только отличия от значений по умолчанию.
     pub keys: BTreeMap<String, String>,
-    /// Клавиша двойного тапа — `keys::Tap` по имени (`off`, `alt`, `ctrl`, `shift`, `cmd`).
+    /// Клавиши удержания и двойного тапа — `keys::Modifier` по имени (`off`, `alt`, `ctrl`, `shift`, `cmd`).
+    pub hold_key: String,
     pub tap_key: String,
     /// Обучение пройдено или пропущено. Нет поля в файле — значит, программа стояла до
     /// обучения: им показывать его не навязываем, а новой установке (файла нет) — показываем.
@@ -88,12 +94,15 @@ impl Default for Settings {
         Self {
             lang: None,
             hotkey: DEFAULT_HOTKEY.into(),
+            hotkey_mode: String::new(),
+            hotkey_hide: String::new(),
             auto_update: true,
             share_stats: true,
             install_id: String::new(),
             autostart_default_applied: false,
             keys: BTreeMap::new(),
-            tap_key: Tap::DEFAULT.name().into(),
+            hold_key: Modifier::HOLD_DEFAULT.name().into(),
+            tap_key: Modifier::TAP_DEFAULT.name().into(),
             onboarded: false,
         }
     }
@@ -111,8 +120,16 @@ impl Settings {
         if uuid::Uuid::parse_str(&self.install_id).is_err() {
             self.install_id = uuid::Uuid::new_v4().to_string();
         }
-        if Tap::parse(&self.tap_key).is_none() {
-            self.tap_key = Tap::DEFAULT.name().into();
+        if Modifier::parse(&self.tap_key).is_none() {
+            self.tap_key = Modifier::TAP_DEFAULT.name().into();
+        }
+        if Modifier::parse(&self.hold_key).is_none() {
+            self.hold_key = Modifier::HOLD_DEFAULT.name().into();
+        }
+        for optional in [&mut self.hotkey_mode, &mut self.hotkey_hide] {
+            if !optional.is_empty() && hotkey::parse(optional).is_err() {
+                optional.clear();
+            }
         }
         if !valid_keys(&self.keys) {
             self.keys.retain(|a, c| valid_key(a, c));
@@ -194,7 +211,23 @@ mod tests {
         );
         assert!(!s.autostart_default_applied);
         assert!(s.keys.is_empty());
-        assert_eq!(s.tap_key, Tap::DEFAULT.name());
+        assert_eq!(s.tap_key, Modifier::TAP_DEFAULT.name());
+        assert_eq!(s.hold_key, "alt");
+        assert!(s.hotkey_mode.is_empty() && s.hotkey_hide.is_empty());
+    }
+
+    #[test]
+    fn broken_optional_hotkeys_and_modifiers_fall_back() {
+        let s: Settings = serde_json::from_str(
+            r#"{"hotkeyMode":"NoSuchKey","hotkeyHide":"Alt+KeyQ","holdKey":"hyper"}"#,
+        )
+        .unwrap();
+        let s = s.sanitize();
+        assert_eq!(s.hotkey_mode, "", "битое — без клавиши");
+        assert_eq!(s.hold_key, "alt");
+        let ok: Settings =
+            serde_json::from_str(r#"{"hotkeyHide":"CommandOrControl+Shift+H"}"#).unwrap();
+        assert_eq!(ok.sanitize().hotkey_hide, "CommandOrControl+Shift+H");
     }
 
     #[test]

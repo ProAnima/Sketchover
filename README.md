@@ -31,7 +31,7 @@ Sketchover puts a transparent canvas over every window. Press one hotkey on a Zo
 - **Paste into the chat**: `Ctrl+Shift+C` copies your drawing as an image — paste it into Zoom, Teams, Slack or Telegram.
 - **Save and keep editing**: `Ctrl+S` saves a PNG that opens anywhere and still contains the editable canvas — open it later with `Ctrl+O`.
 - **Keyboard first, layout independent**: `1`…`0` pick tools, `Alt+1…8` colors, `Shift+1…3` stroke width, `F1` shows a cheat sheet — and every canvas key can be changed in Settings.
-- **Always ready, never in the way**: starts with your system and waits in the tray; one global hotkey (`` Alt+` ``, configurable) opens it on the monitor under your cursor.
+- **Always ready, never in the way**: starts with your system and waits in the tray; a global hotkey (`` Alt+` ``, configurable) opens it on the monitor under your cursor.
 - **Small and private**: a ~3 MB installer, no account; only an anonymous update check and anonymous usage statistics leave your computer, and the statistics can be turned off.
 - **11 languages**: English, Русский, Deutsch, Español, Français, Português, 中文, 日本語, 한국어, العربية, हिन्दी.
 - **Updates itself**, signed releases.
@@ -62,7 +62,8 @@ On the first launch a short tour highlights the toolbar step by step and explain
 | Action | Keys |
 |---|---|
 | Show the canvas / drawing ⇄ click-through | `` Alt+` `` (global, configurable) |
-| Mouse to the windows below while held | hold `Alt` (`⌥` on macOS; Windows and macOS) |
+| Drawing ⇄ click-through, show / hide the canvas | optional global hotkeys — set them in Settings → **Keys** |
+| Mouse to the windows below while held | hold `Alt` (`⌥` on macOS; Windows and macOS; the key is chosen in Settings) |
 | Click-through on / off | double-tap `Alt` on Windows, `⌘` on macOS (the key is chosen in Settings); `Esc`, the mode button or the global hotkey |
 | Tools | `1` select, `2` brush, `3` line, `4` arrow, `5` rectangle, `6` ellipse, `7` text block, `8` text, `9` laser, `0` eraser |
 | Region screenshot | `S` |
@@ -73,7 +74,13 @@ On the first launch a short tour highlights the toolbar step by step and explain
 | Delete selected / clear all | `Delete` / `Shift+Delete` |
 | Edit a text block | double-click it with any tool |
 
-These are the defaults. To change a key: Settings (⚙) → **Canvas keys** → click the key and press the new one (`Esc` cancels). A key already in use moves to the new action; ↺ brings one key back, *Reset all keys* brings them all. Keys follow the physical key, so they work on any keyboard layout; on macOS, `Ctrl` in the table means `⌘`. Holding `Alt` is fixed. The double-tap key is chosen in Settings — `Alt`, `Ctrl`, `Shift`, `⌘` (macOS) or off; on macOS it is `⌘` by default, because double `⌥` already opens other apps (Claude's quick entry, for one).
+These are the defaults; every one of them can be changed in Settings (⚙) → **Keys**, and Sketchover remembers your choice:
+
+- **Global hotkeys** work in any app: *Show the canvas / switch mode* (`` Alt+` ``), plus two optional ones without a key by default — *Drawing ⇄ click-through* and *Show / hide the canvas*. They need a modifier and at most three keys. If another program already holds a combination, Sketchover keeps it, marks it in orange and keeps working.
+- **Hold and double tap**: the key you hold to use the windows below, and the key you double-tap to switch click-through — `Alt`, `Ctrl`, `Shift`, `⌘` (macOS) or off. On macOS the double tap is `⌘` by default, because double `⌥` already opens other apps (Claude's quick entry, for one).
+- **Canvas keys**: click a key and press the new one (`Esc` cancels). A key already in use moves to the new action, and Sketchover tells you where it was taken from; a combination used by a global hotkey cannot be given to a canvas key. ↺ brings one key back, ✕ removes an optional global hotkey, *Reset all keys* brings everything back.
+
+Keys follow the physical key, so they work on any keyboard layout; on macOS, `Ctrl` in the table means `⌘`.
 | Cheat sheet | `F1` |
 
 Viewers see your drawing when you share the **entire screen**, not a single window.

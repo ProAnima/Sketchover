@@ -5,6 +5,10 @@ All notable changes to Sketchover. The release workflow takes the notes for each
 ## [0.5.0]
 
 ### Added
+- One *Keys* section in Settings for every key, saved between launches:
+  - Two more global hotkeys, without a key by default: *Drawing ⇄ click-through* and *Show / hide the canvas*.
+  - Choose the hold key (mouse to the windows below) as well as the double-tap key: `Alt`, `Ctrl`, `Shift`, `⌘` (macOS) or off.
+  - The same click-and-press recording for global and canvas keys. A global hotkey takes its combination away from canvas keys, and you are told where a key was taken from. A combination held by another program is kept and marked in orange.
 - A short tour on the first launch: it highlights the toolbar step by step — tools, color and width, screenshots and saving, undo, click-through, hiding, the cheat sheet, settings — and explains each part with your current keys, in your language. Skip it any time; take it again from Settings → *Take the tour again*. Existing installs are not shown it automatically.
 
 ## [0.4.0]

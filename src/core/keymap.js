@@ -77,3 +77,21 @@ export function digitRun(combos) {
   const ok = split.every((m, i) => (m[1] ?? '') === prefix && Number(m[2]) === i + 1);
   return ok ? { prefix: prefix ? prefix.split('+') : [], last: combos.length } : null;
 }
+
+const ACCEL_MODIFIERS = { Mod: 'CommandOrControl', Ctrl: 'Control', Alt: 'Alt', Shift: 'Shift' };
+
+/**
+ * Сочетание → глобальный хоткей в формате Tauri («Mod+Backquote» → «CommandOrControl+Backquote»),
+ * или null. У глобального нужен модификатор (иначе он перехватит обычный ввод во всех
+ * программах), не больше трёх клавиш, а клавиша — понятная любой раскладке: буква, цифра,
+ * F1–F12, пробел или ` (Ё).
+ */
+export function toAccelerator(combo) {
+  const parts = combo.split('+');
+  const code = parts.pop();
+  const letter = /^Key([A-Z])$/.exec(code) || /^Digit(\d)$/.exec(code);
+  const plain = /^F([1-9]|1[0-2])$/.test(code) || code === 'Space' || code === 'Backquote';
+  const key = letter ? letter[1] : plain ? code : null;
+  if (!key || parts.length === 0 || parts.length > 2) return null;
+  return [...parts.map((p) => ACCEL_MODIFIERS[p]), key].join('+');
+}

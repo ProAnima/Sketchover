@@ -1,13 +1,10 @@
-// Раскрываемая панель: язык, хоткей, автозапуск, обновления, «О программе».
+// Раскрываемая панель: язык, клавиши (keys-settings, globals-settings), автозапуск, обновления, «О программе».
 import { LANGS, lang, setLang, isRtl, t, translatePage } from '../i18n/index.js';
 import { api } from './api.js';
-import { formatKeys, isMac, tapKeys, formatTap } from './keys.js';
 
 const $ = (s) => document.querySelector(s);
 const panel = $('#settings');
 const toggle = $('#settings-toggle');
-const hotkeyButton = $('#hotkey');
-const hotkeyError = $('#hotkey-error');
 const updateStatus = $('#update-status');
 const updateAction = $('#update-action');
 const updateProgress = $('#update-progress');
@@ -17,88 +14,10 @@ let onRelabel = () => {};
 let status = { key: '', params: {} }; // последний статус обновлений — чтобы перевести при смене языка
 let found = null; // найденное обновление
 
-/* ---------- хоткей ---------- */
-// Только клавиши, одинаково понятные всем раскладкам: буквы, цифры, F1–F12, пробел, ` (Ё).
-function keyName(code) {
-  const m = /^Key([A-Z])$/.exec(code) || /^Digit(\d)$/.exec(code);
-  if (m) return m[1];
-  if (/^F([1-9]|1[0-2])$/.test(code)) return code;
-  return code === 'Space' || code === 'Backquote' ? code : null;
-}
-
-function accelerator(e) {
-  const parts = [];
-  if (isMac() ? e.metaKey : e.ctrlKey) parts.push('CommandOrControl');
-  if (isMac() && e.ctrlKey) parts.push('Control');
-  if (!isMac() && e.metaKey) parts.push('Super');
-  if (e.altKey) parts.push('Alt');
-  if (e.shiftKey) parts.push('Shift');
-  const key = keyName(e.code);
-  return key ? { parts, accel: [...parts, key].join('+') } : null;
-}
-
-function showHotkeyError(code) {
-  hotkeyError.hidden = !code;
-  hotkeyError.textContent = code ? t(`settings.hotkey.${code}`) : '';
-}
-
-function stopRecording() {
-  hotkeyButton.classList.remove('recording');
-  hotkeyButton.textContent = formatKeys(info.hotkey);
-}
-
-hotkeyButton.addEventListener('click', () => {
-  hotkeyButton.classList.add('recording');
-  hotkeyButton.textContent = t('settings.hotkey.prompt');
-});
-hotkeyButton.addEventListener('blur', stopRecording);
-hotkeyButton.addEventListener('keydown', async (e) => {
-  if (!hotkeyButton.classList.contains('recording')) return;
-  e.preventDefault();
-  e.stopPropagation();
-  if (e.key === 'Escape') { stopRecording(); return; }
-  const combo = accelerator(e);
-  if (!combo) return; // пока нажаты только модификаторы
-  if (combo.parts.length === 0 || combo.parts.length > 2) { showHotkeyError('invalid'); return; }
-  try {
-    await api.setHotkey(combo.accel);
-    info.hotkey = combo.accel;
-    info.hotkeyOk = true;
-    showHotkeyError(null);
-    onRelabel();
-  } catch (code) {
-    showHotkeyError(code === 'taken' ? 'taken' : 'invalid');
-  }
-  stopRecording();
-});
-
-/* ---------- двойной тап ---------- */
-// Клавиша двойного тапа (сквозной режим): на macOS двойной ⌥ занят другими программами,
-// поэтому выбор — здесь. Опрос клавиш есть только в Windows и macOS.
-function buildTapList() {
-  $('#tap-row').hidden = !info.holdSupported;
-  const select = $('#tap-key');
-  const off = new Option('', 'off');
-  off.dataset.i18n = 'settings.tap.off';
-  select.append(off);
-  for (const key of tapKeys()) select.append(new Option(formatTap(key), key));
-  select.value = info.tapKey;
-  select.addEventListener('change', async () => {
-    try {
-      await api.setTapKey(select.value);
-      info.tapKey = select.value;
-      onRelabel();
-    } catch {
-      select.value = info.tapKey;
-    }
-  });
-}
-
 /* ---------- язык ---------- */
 function applyLanguage() {
   translatePage();
   panel.dir = isRtl() ? 'rtl' : 'ltr';
-  hotkeyButton.textContent = formatKeys(info.hotkey);
   $('#version').textContent = t('about.version', { version: info.version });
   setStatus(status.key, status.params);
   onRelabel();
@@ -189,7 +108,6 @@ export function initSettings(appInfo, { relabel, tour }) {
   $('#tour-again').addEventListener('click', () => { setOpen(false); tour(); });
   setLang(info.lang);
   buildLanguageList();
-  buildTapList();
 
   $('#autostart').checked = info.autostart;
   $('#autostart').addEventListener('change', (e) => {
@@ -208,7 +126,6 @@ export function initSettings(appInfo, { relabel, tour }) {
     if (e.key === 'Escape') { setOpen(false); toggle.focus(); }
   });
 
-  showHotkeyError(info.hotkeyOk ? null : 'taken');
   applyLanguage();
   if (info.autoUpdate) checkUpdate();
 }
