@@ -38,6 +38,7 @@ struct AppInfo {
     share_stats: bool,
     keys: BTreeMap<String, String>,
     tap_key: String,
+    onboarded: bool,
     /// Работает ли удержание Alt для сквозных кликов на этой системе.
     hold_supported: bool,
 }
@@ -56,6 +57,7 @@ fn get_settings(app: AppHandle, store: State<Store>, status: State<hotkey::Statu
         share_stats: s.share_stats,
         keys: s.keys,
         tap_key: s.tap_key,
+        onboarded: s.onboarded,
         hold_supported: keys::poll(keys::Tap::Off).is_some(),
     }
 }
@@ -117,6 +119,11 @@ fn set_keys(store: State<Store>, keys: BTreeMap<String, String>) -> Result<(), S
     }
     store.update(|s| s.keys = keys);
     Ok(())
+}
+
+#[tauri::command]
+fn set_onboarded(store: State<Store>, done: bool) {
+    store.update(|s| s.onboarded = done);
 }
 
 #[tauri::command]
@@ -223,6 +230,7 @@ pub fn run() {
             set_share_stats,
             set_keys,
             set_tap_key,
+            set_onboarded,
             set_pass_through,
             focus_window,
             hide_overlay,

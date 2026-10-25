@@ -183,9 +183,10 @@ function setOpen(open) {
 }
 export const isSettingsOpen = () => !panel.hidden;
 
-export function initSettings(appInfo, { relabel }) {
+export function initSettings(appInfo, { relabel, tour }) {
   info = appInfo;
   onRelabel = relabel;
+  $('#tour-again').addEventListener('click', () => { setOpen(false); tour(); });
   setLang(info.lang);
   buildLanguageList();
   buildTapList();

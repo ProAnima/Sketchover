@@ -9,6 +9,7 @@ import { initShortcuts, onShortcutsChange } from './ui/shortcuts.js';
 import { initKeysSettings, renderKeys } from './ui/keys-settings.js';
 import { initPointer } from './ui/pointer.js';
 import { initSettings } from './ui/settings.js';
+import { initOnboarding, startTour, closeTour } from './ui/onboarding.js';
 import { initScreenshot, cancelScreenshot } from './ui/screenshot.js';
 import { selectTool } from './ui/toolbar.js';
 import { state } from './core/state.js';
@@ -28,7 +29,9 @@ initHelp(tools, info);
 initKeysSettings();
 const relabel = () => { relabelToolbar(); renderHelp(); renderKeys(); };
 onShortcutsChange(relabel);
-initSettings(info, { relabel });
+// Пройти обучение — отмечаем сразу, и при пропуске тоже: показывать его снова решает человек.
+initOnboarding(info, { done: () => { info.onboarded = true; api.setOnboarded(true).catch((e) => showToast(String(e))); } });
+initSettings(info, { relabel, tour: () => { setMode('draw'); startTour(); } });
 // Скриншот сразу выделен: его можно двигать, тянуть за угол и вращать.
 initScreenshot({ placed: (shape) => { selectTool('select'); state.sel = shape.id; render(); } });
 initKeyboard();
@@ -38,9 +41,13 @@ api.on('overlay:show', () => {
   setMode('draw');
   // Глобальный хоткей занят другой программой — без подсказки не понять, почему он не работает.
   if (!info.hotkeyOk) showToast(`${formatKeys(info.hotkey)} — ${t('settings.hotkey.taken')}`);
+  // Первый показ после установки — обучение.
+  if (!info.onboarded) startTour();
 });
 api.on('overlay:toggle', () => {
   cancelScreenshot();
+  // В сквозном режиме карточка обучения не кликается — закрываем, покажется в следующий раз.
+  closeTour();
   toggleMode();
 });
 // Зажат Alt: мышь уходит окнам под холстом, рисунок полупрозрачный.
