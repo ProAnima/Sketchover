@@ -97,6 +97,8 @@ api.on('update:installing', () => setStatus('update.installing'));
 /* ---------- панель ---------- */
 function setOpen(open) {
   panel.hidden = !open;
+  // Памятка справа просвечивала бы сквозь настройки на небольших экранах.
+  document.body.classList.toggle('settings-open', open);
   toggle.setAttribute('aria-expanded', String(open));
   if (open && !status.key) checkUpdate();
 }

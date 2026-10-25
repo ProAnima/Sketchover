@@ -15,6 +15,7 @@ const STEPS = [
   { id: 'style', target: ['#colors', '#widths'] },
   { id: 'capture', target: ['#shot-btn', '#copy-btn', '#save-btn', '#open-btn'] },
   { id: 'undo', target: ['#undo', '#redo', '#clear'] },
+  { id: 'modes', target: ['#fade-btn', '#board-btn'] },
   { id: 'mode', target: ['#mode'] },
   { id: 'hide', target: ['#hide'] },
   { id: 'help', target: ['#help-toggle', '#help'] },
@@ -50,6 +51,11 @@ function stepText(id) {
   const hold = info.holdSupported && info.holdKey !== 'off' ? formatModifierKey(info.holdKey) : null;
   const params = {
     tools: `${firstKeyText('tool.select')} … ${firstKeyText('tool.eraser')}`,
+    marker: firstKeyText('tool.marker'),
+    fade: firstKeyText('fade'),
+    white: firstKeyText('board.white'),
+    black: firstKeyText('board.black'),
+    esc: firstKeyText('pass'),
     colors: groupKeysText('colors'),
     widths: groupKeysText('widths'),
     shot: firstKeyText('shot'),

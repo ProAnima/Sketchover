@@ -4,7 +4,16 @@ All notable changes to Sketchover. The release workflow takes the notes for each
 
 ## [0.5.0]
 
+### Changed
+- `Esc` steps back: it deselects, then removes the board, and only then switches to click-through.
+- Short hints say what just happened and how to undo it: after clearing the canvas, when fading ink is turned on or off, and when a board covers the screen.
+- The toolbar now fits in two even rows on laptop screens (1024–1366 px) instead of three, and the cheat sheet hides while Settings is open.
+- The near-black color is outlined, so it is visible on the dark toolbar; the *Keys* section shows that it expands.
+
 ### Added
+- Highlighter (`M`): a wide, see-through stroke to mark a line of text without hiding it.
+- Fading ink (`F`): lines, arrows and shapes fade away by themselves after a couple of seconds — point things out without cleaning up. Text, blocks and screenshots stay; faded ink is not in undo or in saved files.
+- Whiteboard: `W` for a white board, `K` for a dark one, or the board button. Press again to bring the screen back; the board hides in click-through mode and is part of copied and saved images.
 - One *Keys* section in Settings for every key, saved between launches:
   - Two more global hotkeys, without a key by default: *Drawing ⇄ click-through* and *Show / hide the canvas*.
   - Choose the hold key (mouse to the windows below) as well as the double-tap key: `Alt`, `Ctrl`, `Shift`, `⌘` (macOS) or off.

@@ -1,6 +1,6 @@
 // Холст как картинка: в буфер обмена (вставить в чат созвона) и в файл PNG со сценой внутри —
 // открывается любым просмотрщиком и снова редактируется в Sketchover.
-import { state, reserveIds } from '../core/state.js';
+import { state, reserveIds, BOARDS } from '../core/state.js';
 import { bounds } from '../core/shapes.js';
 import { commit } from '../core/history.js';
 import { addImage, getImage } from '../core/images.js';
@@ -43,6 +43,11 @@ function renderScene() {
   const c = canvas.getContext('2d');
   c.scale(scale, scale);
   c.translate(-box.x, -box.y);
+  // На доске рисовали по белому или тёмному — без фона картинка была бы другой.
+  if (state.board) {
+    c.fillStyle = BOARDS[state.board];
+    c.fillRect(box.x, box.y, box.w, box.h);
+  }
   for (const s of state.shapes) drawShape(c, s);
   return canvas;
 }

@@ -4,7 +4,7 @@
 
 <h1 align="center">Sketchover</h1>
 
-<p align="center"><b>Draw on your screen during calls</b> — brush, arrows, Markdown text blocks, region screenshots and a laser pointer.<br>A free, open-source screen annotation tool for Windows, macOS and Linux.</p>
+<p align="center"><b>Draw on your screen during calls</b> — brush, highlighter, arrows, Markdown text blocks, region screenshots, a laser pointer and a whiteboard.<br>A free, open-source screen annotation tool for Windows, macOS and Linux.</p>
 
 <p align="center">
   <a href="https://github.com/ProAnima/Sketchover/releases/latest"><img src="https://img.shields.io/github/v/release/ProAnima/Sketchover?label=download&color=6D28D9" alt="Latest release"></a>
@@ -23,7 +23,9 @@ Sketchover puts a transparent canvas over every window. Press one hotkey on a Zo
 
 ## Features
 
-- **Draw on top of any app**: brush, line, arrow, rectangle, ellipse, text and a fading laser pointer.
+- **Draw on top of any app**: brush, highlighter, line, arrow, rectangle, ellipse, text and a fading laser pointer.
+- **Fading ink**: press `F` and everything you draw fades away by itself after a couple of seconds — point things out without cleaning up.
+- **Whiteboard**: `W` puts a white board over the screen, `K` a dark one; press again to bring the screen back.
 - **Click-through**: hold `Alt` to click and scroll the windows below; double-tap `Alt` (`⌘` on macOS) to stay in click-through mode. The drawing stays, semi-transparent.
 - **Text blocks with Markdown**: headings, bullet and numbered lists (they continue on `Enter`), **bold**, *italic*, `code`, ~~strikethrough~~.
 - **Arrows that stick**: arrows attach to text blocks and screenshots and follow them when you move them.
@@ -65,13 +67,16 @@ On the first launch a short tour highlights the toolbar step by step and explain
 | Drawing ⇄ click-through, show / hide the canvas | optional global hotkeys — set them in Settings → **Keys** |
 | Mouse to the windows below while held | hold `Alt` (`⌥` on macOS; Windows and macOS; the key is chosen in Settings) |
 | Click-through on / off | double-tap `Alt` on Windows, `⌘` on macOS (the key is chosen in Settings); `Esc`, the mode button or the global hotkey |
-| Tools | `1` select, `2` brush, `3` line, `4` arrow, `5` rectangle, `6` ellipse, `7` text block, `8` text, `9` laser, `0` eraser |
+| Tools | `1` select, `2` brush, `M` highlighter, `3` line, `4` arrow, `5` rectangle, `6` ellipse, `7` text block, `8` text, `9` laser, `0` eraser |
 | Region screenshot | `S` |
+| Fading ink on / off | `F` |
+| White / dark board on / off | `W` / `K` (or `Esc`) |
+| Step back | `Esc`: deselect, then remove the board, then click-through |
 | Color / stroke width | `Alt+1…8` / `Shift+1…3` |
 | Undo / redo | `Ctrl+Z` / `Ctrl+Y` |
 | Copy the drawing as an image | `Ctrl+Shift+C` |
 | Save / open (PNG with the editable canvas inside) | `Ctrl+S` / `Ctrl+O` |
-| Delete selected / clear all | `Delete` / `Shift+Delete` |
+| Delete selected / clear all | `Delete` / `Shift+Delete` (`Ctrl+Z` brings it back) |
 | Edit a text block | double-click it with any tool |
 
 These are the defaults; every one of them can be changed in Settings (⚙) → **Keys**, and Sketchover remembers your choice:

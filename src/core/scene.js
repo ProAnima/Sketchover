@@ -4,10 +4,11 @@
 export const SCENE_KEY = 'sketchover';
 const VERSION = 1;
 
-const TYPES = new Set(['pen', 'line', 'arrow', 'rect', 'ellipse', 'node', 'text', 'image']);
+const TYPES = new Set(['pen', 'marker', 'line', 'arrow', 'rect', 'ellipse', 'node', 'text', 'image']);
 const BOX = ['x', 'y', 'w', 'h'];
 const FIELDS = {
   pen: [],
+  marker: [],
   line: ['x1', 'y1', 'x2', 'y2'],
   arrow: ['x1', 'y1', 'x2', 'y2'],
   rect: BOX,
@@ -28,7 +29,7 @@ function validShape(s) {
   if (!s || typeof s !== 'object' || !TYPES.has(s.type)) return false;
   if (!Number.isSafeInteger(s.id) || s.id <= 0 || !isColor(s.color) || !isNum(s.width)) return false;
   if (!FIELDS[s.type].every((f) => isNum(s[f]))) return false;
-  if (s.type === 'pen') return Array.isArray(s.points) && s.points.length > 0 && s.points.every((p) => isNum(p?.x) && isNum(p?.y));
+  if (s.type === 'pen' || s.type === 'marker') return Array.isArray(s.points) && s.points.length > 0 && s.points.every((p) => isNum(p?.x) && isNum(p?.y));
   if (s.type === 'node' || s.type === 'text') return typeof s.text === 'string';
   if (s.type === 'image') return typeof s.imageId === 'string' && (s.rotation === undefined || isNum(s.rotation));
   if (s.type === 'line' || s.type === 'arrow') return [s.from, s.to].every((v) => v === null || v === undefined || Number.isSafeInteger(v));
