@@ -6,8 +6,11 @@ body.mode-draw #board { cursor: crosshair; }
 body.mode-pass #board, body.peek #board { opacity: .5; }
 body.mode-draw::after { content: ""; position: fixed; inset: 0; border: 3px solid rgba(255, 59, 48, .75); pointer-events: none; }
 
+/* Ширина своя, а не «половина экрана» (так считает браузер при left: 50%): иначе на 1280 px
+   панель уходила в три строки. 760 px — две ровные строки: чем рисовать / что делать. */
 #dock {
   position: fixed; top: 12px; left: 50%; transform: translateX(-50%); z-index: 10;
+  width: max-content; max-width: min(760px, calc(100vw - 24px));
   display: flex; flex-direction: column; align-items: center; gap: 6px;
 }
 #toolbar, #settings {
@@ -24,6 +27,8 @@ button:focus-visible { outline: 2px solid #0a84ff; }
 button.active { background: #0a84ff; color: #fff; }
 button.swatch { min-width: 22px; width: 22px; height: 22px; padding: 0; border-radius: 50%; border: 2px solid transparent; }
 button.swatch.active { border-color: #fff; background-clip: padding-box; }
+/* Почти чёрный цвет на тёмной панели иначе не виден. */
+button.swatch[data-color="#111111"] { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .4); }
 button .icon, #help .icon { width: 17px; height: 17px; fill: currentColor; }
 #help .icon { width: 13px; height: 13px; }
 button.width i { display: block; width: 18px; background: currentColor; border-radius: 4px; }
@@ -54,7 +59,12 @@ body.mode-pass #mode { background: rgba(52, 199, 89, .85); }
 #settings .about dt { opacity: .55; }
 #settings .about dd { margin: 0; }
 #settings .selectable { user-select: text; }
-#keys summary { cursor: pointer; min-height: 28px; display: flex; align-items: center; }
+#keys summary { cursor: pointer; min-height: 28px; display: flex; align-items: center; list-style: none; }
+#keys summary::-webkit-details-marker { display: none; }
+/* Стрелка — видно, что раздел раскрывается. */
+#keys summary::after { content: "›"; display: inline-block; margin-inline-start: auto; font-size: 18px; opacity: .6; transition: transform .2s; }
+#keys[open] summary::after { transform: rotate(90deg); }
+body.settings-open #help { display: none; }
 #keys h4 { margin: 10px 0 2px; font-size: 11px; font-weight: 600; opacity: .55; }
 #keys h4.keys-heading { margin-top: 14px; font-size: 12px; opacity: .85; text-transform: uppercase; letter-spacing: .05em; }
 #modifier-list[hidden] { display: none; }
