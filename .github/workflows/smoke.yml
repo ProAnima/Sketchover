@@ -1,6 +1,9 @@
 # Проверка установщиков запуском на чистых машинах Windows, macOS и Linux: установить так же,
-# как пользователь, запустить, убедиться, что программа жива, создала настройки и что холст
+# как пользователь, запустить, убедиться, что программа жива, дописала настройки и что холст
 # прозрачный (снимки экрана до и после — scripts/smoke-transparency.py).
+# Настройки кладём заранее с пройденным обучением: на свежей установке оно затемняет экран,
+# и замер прозрачности проверял бы затемнение, а не холст. Что программа сама их прочла и
+# дописала, видно по installId — его создаёт только она.
 # Из release.yml — для черновика перед публикацией; вручную — для любого тега.
 name: Smoke
 
@@ -80,13 +83,17 @@ jobs:
           $exe = Get-ChildItem "$env:LOCALAPPDATA\Sketchover" -Filter *.exe | Where-Object Name -notmatch 'uninstall' | Select-Object -First 1
           if (-not $exe) { throw 'Программа не установилась' }
           "Установлено: $($exe.FullName)"
+          $dir = "$env:APPDATA\studio.proanima.sketchover"
+          New-Item -ItemType Directory -Force $dir | Out-Null
+          # Без BOM: иначе JSON не разберётся, и настройки сбросятся к значениям по умолчанию.
+          [IO.File]::WriteAllText("$dir\settings.json", '{"onboarded":true}')
           Shot "smoke\windows-before.png"
           $p = Start-Process $exe.FullName -PassThru
           Start-Sleep $env:ALIVE_SECONDS
           if ($p.HasExited) { throw "Программа завершилась с кодом $($p.ExitCode)" }
           Shot "smoke\windows.png"
           $settings = "$env:APPDATA\studio.proanima.sketchover\settings.json"
-          if (-not (Test-Path $settings)) { throw 'Настройки не созданы' }
+          if (-not (Select-String -Path $settings -Pattern 'installId' -Quiet)) { throw 'Программа не дописала настройки' }
           Stop-Process -Id $p.Id
           python scripts\smoke-transparency.py smoke\windows-before.png smoke\windows.png --require
           if ($LASTEXITCODE) { throw 'Холст не прозрачный' }
@@ -109,13 +116,16 @@ jobs:
           # Под холстом — окно Finder, чтобы было что увидеть сквозь него.
           open /System/Applications
           sleep 3
+          config="$HOME/Library/Application Support/studio.proanima.sketchover"
+          mkdir -p "$config"
+          echo '{"onboarded":true}' > "$config/settings.json"
           screencapture -x smoke/macos-before.png
           open /Applications/Sketchover.app
           sleep "$ALIVE_SECONDS"
           pid="$(pgrep -f "$bin" || true)"
           [ -n "$pid" ] || { echo "Программа не запущена"; exit 1; }
           screencapture -x smoke/macos.png
-          test -f "$HOME/Library/Application Support/studio.proanima.sketchover/settings.json" || { echo "Настройки не созданы"; exit 1; }
+          grep -q installId "$config/settings.json" || { echo "Программа не дописала настройки"; exit 1; }
           kill $pid
           python3 scripts/smoke-transparency.py smoke/macos-before.png smoke/macos.png --require
 
@@ -139,6 +149,8 @@ jobs:
           check() { # имя, команда…
             name="$1"; shift
             rm -rf "$HOME/.config/studio.proanima.sketchover"
+            mkdir -p "$HOME/.config/studio.proanima.sketchover"
+            echo '{"onboarded":true}' > "$HOME/.config/studio.proanima.sketchover/settings.json"
             xvfb-run -a -s "-screen 0 1920x1080x24" dbus-run-session -- bash -c '
               set -e
               xcompmgr & sleep 1
@@ -153,7 +165,7 @@ jobs:
               import -window root "smoke/linux-'"$name"'.png"
               kill "$pid"
             ' _ "$@"
-            test -f "$HOME/.config/studio.proanima.sketchover/settings.json" || { echo "Настройки не созданы"; exit 1; }
+            grep -q installId "$HOME/.config/studio.proanima.sketchover/settings.json" || { echo "Программа не дописала настройки"; exit 1; }
             python3 scripts/smoke-transparency.py "smoke/linux-$name-before.png" "smoke/linux-$name.png" --require
             echo "$name: работает"
           }
