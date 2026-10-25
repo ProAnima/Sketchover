@@ -2,6 +2,7 @@ import { state } from '../core/state.js';
 import { t } from '../i18n/index.js';
 import { api } from './api.js';
 import { finishEdit } from './editor.js';
+import { render } from './canvas.js';
 
 const dock = document.querySelector('#dock');
 
@@ -24,6 +25,7 @@ export function setMode(mode) {
   relabelMode();
   if (mode === 'draw') api.focus();
   syncPassThrough();
+  render(); // доска видна только в режиме рисования
 }
 
 export const toggleMode = () => setMode(state.mode === 'draw' ? 'pass' : 'draw');

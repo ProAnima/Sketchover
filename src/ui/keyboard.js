@@ -3,7 +3,7 @@ import { comboFromEvent } from '../core/keymap.js';
 import { render } from './canvas.js';
 import { setMode } from './mode.js';
 import { undo, redo, deleteSelected, clearAll } from './actions.js';
-import { selectTool, applyStyle } from './toolbar.js';
+import { selectTool, applyStyle, toggleFade, toggleBoard } from './toolbar.js';
 import { toggleHelp } from './help.js';
 import { takeScreenshot } from './screenshot.js';
 import { copyImage, saveScene, openScene } from './export.js';
@@ -15,6 +15,7 @@ const RUN = {
   pass: () => { if (state.sel != null) { state.sel = null; render(); } else setMode('pass'); },
   help: toggleHelp,
   shot: takeScreenshot,
+  fade: toggleFade,
   undo,
   redo,
   copy: copyImage,
@@ -29,6 +30,7 @@ function run(action) {
   if (kind === 'tool') return selectTool(arg);
   if (kind === 'color') return applyStyle({ color: COLORS[Number(arg) - 1] });
   if (kind === 'width') return applyStyle({ width: WIDTHS[Number(arg) - 1] });
+  if (kind === 'board') return toggleBoard(arg);
   return RUN[action]();
 }
 

@@ -1,7 +1,7 @@
 import { state, NODE_SIZE } from '../core/state.js';
-import { createShape, isLine, attachAt, removeShape, topmostAt } from '../core/shapes.js';
+import { createShape, isLine, isStroke, attachAt, removeShape, topmostAt } from '../core/shapes.js';
 
-// Инструмент «протяни фигуру»: карандаш, линия, стрелка, прямоугольник, эллипс, нода.
+// Инструмент «протяни фигуру»: кисть, маркер, линия, стрелка, прямоугольник, эллипс, нода.
 export function createShapeTool(meta, host) {
   let drag = null; // { shape, x, y }
 
@@ -35,7 +35,7 @@ export function createShapeTool(meta, host) {
     move(x, y) {
       if (!drag) return;
       const s = drag.shape;
-      if (s.type === 'pen') s.points.push({ x, y });
+      if (isStroke(s)) s.points.push({ x, y });
       else if (isLine(s)) Object.assign(s, { x2: x, y2: y });
       else Object.assign(s, { x: Math.min(drag.x, x), y: Math.min(drag.y, y), w: Math.abs(x - drag.x), h: Math.abs(y - drag.y) });
       host.render();

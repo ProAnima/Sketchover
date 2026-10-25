@@ -27,6 +27,8 @@ button.swatch.active { border-color: #fff; background-clip: padding-box; }
 button .icon, #help .icon { width: 17px; height: 17px; fill: currentColor; }
 #help .icon { width: 13px; height: 13px; }
 button.width i { display: block; width: 18px; background: currentColor; border-radius: 4px; }
+#board-btn[data-board="white"] { background: #fff; color: #111; }
+#board-btn[data-board="black"] { background: #1e2127; color: #fff; outline: 1px solid rgba(255, 255, 255, .35); }
 #mode { font-size: 13px; padding: 0 10px; background: rgba(255, 59, 48, .85); }
 body.mode-pass #mode { background: rgba(52, 199, 89, .85); }
 #settings-toggle[aria-expanded="true"] { background: rgba(255, 255, 255, .18); }

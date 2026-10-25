@@ -1,6 +1,7 @@
 import { state } from '../core/state.js';
 import { commit, undo, version } from '../core/history.js';
 import { getShape, topmostAt } from '../core/shapes.js';
+import { splitFading } from '../core/fade.js';
 import { canvas, render } from './canvas.js';
 import { editText, finishEdit } from './editor.js';
 
@@ -15,6 +16,16 @@ export function initPointer(tools) {
   let active = null; // инструмент, получивший pointerdown
   let lastClick = null; // версии истории до и после предыдущего клика
   let lastDown = null; // время и место предыдущего нажатия
+  let before = new Set(); // id фигур до жеста
+
+  // Исчезающие рисунки: новые линии и фигуры жеста уходят с холста в угасание — без истории.
+  function moveToFading() {
+    const { kept, fading } = splitFading(state.shapes, before);
+    if (!fading.length) return;
+    state.shapes = kept;
+    const since = performance.now();
+    state.fading.push(...fading.map((shape) => ({ shape, since })));
+  }
 
   // Двойной клик по блоку или тексту — правка текста любым инструментом.
   function editOnDoubleClick(x, y) {
@@ -40,6 +51,8 @@ export function initPointer(tools) {
     finishEdit();
     canvas.setPointerCapture(e.pointerId);
     lastClick = { before: version(), after: null };
+    // Что было до жеста: в режиме «исчезающие» гаснут только новые фигуры.
+    before = new Set(state.shapes.map((s) => s.id));
     active = current();
     active.down(e.clientX, e.clientY);
   });
@@ -53,6 +66,7 @@ export function initPointer(tools) {
     const tool = active;
     active = null;
     tool.up(e.clientX, e.clientY);
+    if (state.fade) moveToFading();
     if (!state.editing) commit(); // при правке текста commit будет в finishEdit
     if (lastClick) lastClick.after = version();
     render();

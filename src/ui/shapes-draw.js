@@ -1,5 +1,5 @@
 // Рисование фигур в любой 2D-контекст: экранный холст (canvas.js) и картинку для экспорта (export.js).
-import { resolveLine, layoutText, CODE_PAD } from '../core/shapes.js';
+import { resolveLine, layoutText, strokeWidth, CODE_PAD } from '../core/shapes.js';
 import { getImage } from '../core/images.js';
 
 function drawArrowHead(c, x1, y1, x2, y2, width) {
@@ -84,6 +84,12 @@ export function drawShape(c, s, editing = null) {
   c.lineJoin = 'round';
   switch (s.type) {
     case 'pen':
+      drawPen(c, s);
+      break;
+    case 'marker':
+      // Один контур целиком: там, где штрих пересекает сам себя, он не темнеет.
+      c.globalAlpha *= 0.38;
+      c.lineWidth = strokeWidth(s);
       drawPen(c, s);
       break;
     case 'line':

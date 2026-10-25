@@ -1,4 +1,5 @@
-import { state } from '../core/state.js';
+import { state, BOARDS } from '../core/state.js';
+import { fadeAlpha } from '../core/fade.js';
 import { selected, isBox, canRotate, bounds, setTextMeasurer, ROTATE_HANDLE_OFFSET } from '../core/shapes.js';
 import { drawShape, enterShape } from './shapes-draw.js';
 
@@ -72,15 +73,32 @@ function drawLaser(now) {
   }
 }
 
+// Угасающие фигуры — поверх, с убывающей непрозрачностью; угасшие убираем.
+function drawFading(now) {
+  state.fading = state.fading.filter((f) => fadeAlpha(f.since, now) > 0);
+  for (const f of state.fading) {
+    ctx.save();
+    ctx.globalAlpha = fadeAlpha(f.since, now);
+    drawShape(ctx, f.shape);
+    ctx.restore();
+  }
+}
+
 function paint() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // Доска — только в режиме рисования: в сквозном режиме под ней должны быть видны окна.
+  if (state.board && state.mode === 'draw') {
+    ctx.fillStyle = BOARDS[state.board];
+    ctx.fillRect(0, 0, innerWidth, innerHeight);
+  }
   for (const s of state.shapes) drawShape(ctx, s, state.editing);
   const sel = selected();
   if (sel && state.tool === 'select' && sel !== state.editing) drawSelection(sel);
-  if (state.laser.points.length) {
-    drawLaser(performance.now());
-    render(); // пока след лазера не угас — анимируем
-  }
+  const now = performance.now();
+  if (state.fading.length) drawFading(now);
+  if (state.laser.points.length) drawLaser(now);
+  // Пока что-то гаснет — анимируем; в простое кадры не рисуются.
+  if (state.fading.length || state.laser.points.length) render();
 }
 
 // Перерисовка не чаще одного раза за кадр; в простое кадры не рисуются.

@@ -51,6 +51,8 @@ export function renderHelp() {
   aside.append(grid);
 
   aside.append(row(firstKey('shot'), t('help.shot')));
+  aside.append(row(firstKey('fade'), t('toolbar.fade')));
+  aside.append(row(pair('board.white', 'board.black'), t('toolbar.board')));
   aside.append(row(groupKeys('colors'), t('help.colors')));
   aside.append(row(groupKeys('widths'), t('help.widths')));
   aside.append(row(pair('undo', 'redo'), t('help.undo')));

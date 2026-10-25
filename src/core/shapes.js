@@ -91,10 +91,17 @@ export function textSize(s) {
   return { w, h };
 }
 
+/** Штрих от руки: кисть или маркер — точки, а не концы или рамка. */
+export const isStroke = (s) => s.type === 'pen' || s.type === 'marker';
+
+/** Толщина линии на экране: маркер в разы шире кисти той же толщины — им выделяют текст. */
+export const strokeWidth = (s) => (s.type === 'marker' ? s.width * 4 + 6 : s.width);
+
 export function createShape(type, x, y) {
   const base = { id: newId(), type, color: state.color, width: state.width };
   switch (type) {
-    case 'pen': return { ...base, points: [{ x, y }] };
+    case 'pen':
+    case 'marker': return { ...base, points: [{ x, y }] };
     case 'line':
     case 'arrow': return { ...base, x1: x, y1: y, x2: x, y2: y, from: null, to: null };
     case 'text': return { ...base, x, y, text: '', size: 18 + state.width * 2 };
@@ -120,8 +127,9 @@ export function resolveLine(s) {
 
 export function hit(s, x, y, tol = 7) {
   switch (s.type) {
-    case 'pen': {
-      const r = tol + s.width / 2;
+    case 'pen':
+    case 'marker': {
+      const r = tol + strokeWidth(s) / 2;
       const p = s.points;
       if (p.length === 1) return Math.hypot(x - p[0].x, y - p[0].y) <= r;
       for (let i = 1; i < p.length; i++) {
@@ -179,7 +187,7 @@ export function bounds(s) {
   }
   if (isBox(s)) return { x: s.x, y: s.y, w: s.w, h: s.h };
   if (s.type === 'text') return { x: s.x, y: s.y, ...textSize(s) };
-  if (s.type === 'pen') {
+  if (isStroke(s)) {
     const xs = s.points.map((p) => p.x);
     const ys = s.points.map((p) => p.y);
     const x = Math.min(...xs);
@@ -191,7 +199,7 @@ export function bounds(s) {
 }
 
 export function move(s, dx, dy) {
-  if (s.type === 'pen') s.points.forEach((p) => { p.x += dx; p.y += dy; });
+  if (isStroke(s)) s.points.forEach((p) => { p.x += dx; p.y += dy; });
   else if (isLine(s)) {
     // Перемещённая линия отцепляется от нод, иначе она бы «вернулась» к ним.
     const l = resolveLine(s);

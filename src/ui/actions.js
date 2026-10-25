@@ -17,6 +17,7 @@ export function redo() {
 export function clearAll() {
   finishEdit();
   state.shapes = [];
+  state.fading = [];
   state.sel = null;
   commit();
   render();

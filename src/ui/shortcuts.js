@@ -9,6 +9,10 @@ const GENERAL = [
   { id: 'pass', label: 'toolbar.mode', keys: ['Escape'] },
   { id: 'help', label: 'toolbar.help', keys: ['F1'] },
   { id: 'shot', label: 'toolbar.shot', keys: ['KeyS'] },
+  { id: 'fade', label: 'toolbar.fade', keys: ['KeyF'] },
+  // Как в ZoomIt: W — белая доска, K — тёмная (blacKboard).
+  { id: 'board.white', label: 'toolbar.boardWhite', keys: ['KeyW'] },
+  { id: 'board.black', label: 'toolbar.boardBlack', keys: ['KeyK'] },
   { id: 'undo', label: 'toolbar.undo', keys: ['Mod+KeyZ'] },
   { id: 'redo', label: 'toolbar.redo', keys: ['Mod+KeyY', 'Mod+Shift+KeyZ'] },
   { id: 'copy', label: 'toolbar.copy', keys: ['Mod+Shift+KeyC'] },
@@ -32,8 +36,7 @@ export function initShortcuts(tools, overrides, { onSave }) {
   save = onSave;
   actions = [
     ...GENERAL.map((a) => ({ id: a.id, group: 'general', label: () => t(a.label), keys: a.keys })),
-    // Инструменты — по порядку панели: 1…9, затем 0.
-    ...tools.map((tool, i) => ({ id: `tool.${tool.id}`, group: 'tools', label: () => t(tool.label), keys: [`Digit${(i + 1) % 10}`] })),
+    ...tools.map((tool) => ({ id: `tool.${tool.id}`, group: 'tools', label: () => t(tool.label), keys: tool.key ? [tool.key] : [] })),
     ...COLORS.map((color, i) => ({ id: `color.${i + 1}`, group: 'colors', color, label: () => t('toolbar.color', { n: i + 1 }), keys: [`Alt+Digit${i + 1}`] })),
     ...WIDTHS.map((w, i) => ({ id: `width.${i + 1}`, group: 'widths', label: () => t('toolbar.width', { n: w }), keys: [`Shift+Digit${i + 1}`] })),
   ];
