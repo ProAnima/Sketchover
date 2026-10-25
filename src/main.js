@@ -39,13 +39,14 @@ initScreenshot({ placed: (shape) => { selectTool('select'); state.sel = shape.id
 initKeyboard();
 initPointer(tools);
 addEventListener('resize', resize);
-api.on('overlay:show', () => {
+function onShow() {
   setMode('draw');
   // Глобальный хоткей занят другой программой — без подсказки не понять, почему он не работает.
   if (!info.hotkeyOk) showToast(`${formatKeys(info.hotkey)} — ${t('settings.hotkey.taken')}`);
   // Первый показ после установки — обучение.
   if (!info.onboarded) startTour();
-});
+}
+api.on('overlay:show', onShow);
 api.on('overlay:toggle', () => {
   cancelScreenshot();
   // В сквозном режиме карточка обучения не кликается — закрываем, покажется в следующий раз.
@@ -54,5 +55,8 @@ api.on('overlay:toggle', () => {
 });
 // Зажат Alt: мышь уходит окнам под холстом, рисунок полупрозрачный.
 api.on('overlay:peek', (held) => document.body.classList.toggle('peek', held));
-// Окно стартует спрятанным; режим рисования включится событием overlay:show при первом показе.
 resize();
+// При ручном запуске Rust показывает окно раньше, чем интерфейс подписался на overlay:show, —
+// то событие теряется. Поэтому уже видимый холст встречаем сами (иначе нет обучения при первом
+// запуске и подсказки о занятом хоткее). Спрятанный (автозапуск) дождётся события.
+if (info.visible) onShow();
