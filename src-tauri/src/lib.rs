@@ -53,6 +53,9 @@ struct AppInfo {
     onboarded: bool,
     /// Работают ли удержание и двойной тап на этой системе (опрос клавиш).
     hold_supported: bool,
+    /// Холст уже показан: при ручном запуске окно появляется раньше, чем интерфейс
+    /// подписался на `overlay:show`, — и интерфейс встречает показ сам.
+    visible: bool,
 }
 
 #[tauri::command]
@@ -81,6 +84,10 @@ fn get_settings(app: AppHandle, store: State<Store>, hotkeys: State<hotkey::Hotk
         tap_key: s.tap_key,
         onboarded: s.onboarded,
         hold_supported: keys::poll(keys::Modifier::Off, keys::Modifier::Off).is_some(),
+        visible: app
+            .get_webview_window(overlay::LABEL)
+            .and_then(|w| w.is_visible().ok())
+            .unwrap_or(false),
     }
 }
 
