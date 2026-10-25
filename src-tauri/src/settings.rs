@@ -73,6 +73,14 @@ pub struct Settings {
     pub keys: BTreeMap<String, String>,
     /// Клавиша двойного тапа — `keys::Tap` по имени (`off`, `alt`, `ctrl`, `shift`, `cmd`).
     pub tap_key: String,
+    /// Обучение пройдено или пропущено. Нет поля в файле — значит, программа стояла до
+    /// обучения: им показывать его не навязываем, а новой установке (файла нет) — показываем.
+    #[serde(default = "already_onboarded")]
+    pub onboarded: bool,
+}
+
+fn already_onboarded() -> bool {
+    true
 }
 
 impl Default for Settings {
@@ -86,6 +94,7 @@ impl Default for Settings {
             autostart_default_applied: false,
             keys: BTreeMap::new(),
             tap_key: Tap::DEFAULT.name().into(),
+            onboarded: false,
         }
     }
 }
@@ -186,6 +195,13 @@ mod tests {
         assert!(!s.autostart_default_applied);
         assert!(s.keys.is_empty());
         assert_eq!(s.tap_key, Tap::DEFAULT.name());
+    }
+
+    #[test]
+    fn onboarding_is_for_new_installs_only() {
+        assert!(!Settings::default().onboarded, "новая установка — обучение");
+        let old: Settings = serde_json::from_str(r#"{"hotkey":"Alt+Backquote"}"#).unwrap();
+        assert!(old.onboarded, "настройки до обучения — не навязываем");
     }
 
     #[test]

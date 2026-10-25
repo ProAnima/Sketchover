@@ -2,6 +2,11 @@
 
 All notable changes to Sketchover. The release workflow takes the notes for each version from this file.
 
+## [0.5.0]
+
+### Added
+- A short tour on the first launch: it highlights the toolbar step by step — tools, color and width, screenshots and saving, undo, click-through, hiding, the cheat sheet, settings — and explains each part with your current keys, in your language. Skip it any time; take it again from Settings → *Take the tour again*. Existing installs are not shown it automatically.
+
 ## [0.4.0]
 
 ### Added

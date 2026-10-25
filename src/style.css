@@ -90,3 +90,43 @@ body.shooting #dock, body.shooting #help { display: none; }
   background: rgba(0, 0, 0, .35); border: 1px dashed #fff; border-radius: 6px; outline: none;
   font-family: system-ui, sans-serif; line-height: 1.25; user-select: text; text-align: left;
 }
+
+/* Обучение. «Окно» вокруг элемента — тень на весь экран: плавно перетекает между шагами. */
+#tour { position: fixed; inset: 0; z-index: 50; }
+.tour-spot {
+  position: fixed; border-radius: 10px; pointer-events: none;
+  box-shadow: 0 0 0 200vmax rgba(0, 0, 0, .62); outline: 2px solid #0a84ff;
+  transition: left .45s cubic-bezier(.4, 0, .2, 1), top .45s cubic-bezier(.4, 0, .2, 1),
+    width .45s cubic-bezier(.4, 0, .2, 1), height .45s cubic-bezier(.4, 0, .2, 1);
+}
+.tour-spot::after {
+  content: ""; position: absolute; inset: -6px; border-radius: 14px; border: 2px solid #0a84ff;
+  animation: tour-pulse 1.6s ease-out infinite;
+}
+.tour-spot.empty { outline: none; }
+.tour-spot.empty::after { display: none; }
+@keyframes tour-pulse { from { opacity: .9; transform: scale(1); } to { opacity: 0; transform: scale(1.12); } }
+.tour-card {
+  position: fixed; box-sizing: border-box; width: min(340px, calc(100vw - 24px)); padding: 16px 18px 14px;
+  background: rgba(24, 24, 28, .98); color: #eee; border-radius: 12px; box-shadow: 0 10px 40px rgba(0, 0, 0, .5);
+  font-size: 14px; line-height: 1.45;
+  transition: left .45s cubic-bezier(.4, 0, .2, 1), top .45s cubic-bezier(.4, 0, .2, 1);
+}
+/* Видна и без анимации: если она не проиграется, карточка не пропадёт за затемнением. */
+.tour-card.show { animation: tour-in .35s ease-out; }
+@keyframes tour-in { from { opacity: 0; transform: translateY(8px); } }
+.tour-card h3 { margin: 0 0 6px; font-size: 16px; }
+.tour-card p { margin: 0 0 14px; }
+.tour-card kbd { white-space: nowrap; padding: 1px 5px; border-radius: 4px; background: rgba(255, 255, 255, .12); font: 12px ui-monospace, Consolas, monospace; }
+.tour-step { display: block; margin-bottom: 4px; font-size: 11px; opacity: .55; }
+.tour-actions { display: flex; align-items: center; gap: 8px; }
+.tour-gap { flex: 1; }
+.tour-card button { height: 30px; padding: 0 12px; border-radius: 8px; font-size: 13px; }
+.tour-card button.primary { background: #0a84ff; color: #fff; }
+.tour-card button.text { color: #0a84ff; }
+.tour-card button.tour-skip { padding: 0; color: rgba(255, 255, 255, .6); }
+@media (prefers-reduced-motion: reduce) {
+  .tour-spot, .tour-card { transition: none; }
+  .tour-spot::after { animation: none; }
+  .tour-card.show { animation: none; }
+}

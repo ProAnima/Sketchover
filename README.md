@@ -51,6 +51,8 @@ Get the installer for your system from the [latest release](https://github.com/P
 
 Sketchover opens the canvas right after install — press `` Alt+` `` (the key left of `1`) any time to bring it back. It then lives in the tray (the menu bar on macOS) and starts with your system, so it is always one hotkey away. Turn off “Start with the system” in Settings if you prefer; closing the canvas only hides it — quit from the tray or Settings.
 
+On the first launch a short tour highlights the toolbar step by step and explains each part with your current keys. Skip it any time; take it again from Settings → *Take the tour again*.
+
 **First launch.** The installers are not yet signed with a paid developer certificate:
 - Windows may show “Windows protected your PC” → More info → Run anyway.
 - macOS may say the developer cannot be verified → right-click Sketchover in Finder → Open → Open. For screenshots, macOS asks once for Screen Recording permission.
