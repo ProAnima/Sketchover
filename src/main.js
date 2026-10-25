@@ -7,6 +7,7 @@ import { setPlatform, formatKeys } from './ui/keys.js';
 import { initKeyboard } from './ui/keyboard.js';
 import { initShortcuts, onShortcutsChange } from './ui/shortcuts.js';
 import { initKeysSettings, renderKeys } from './ui/keys-settings.js';
+import { initGlobalsSettings, renderGlobals } from './ui/globals-settings.js';
 import { initPointer } from './ui/pointer.js';
 import { initSettings } from './ui/settings.js';
 import { initOnboarding, startTour, closeTour } from './ui/onboarding.js';
@@ -26,8 +27,9 @@ setPlatform(info.os);
 initShortcuts(tools, info.keys, { onSave: (keys) => api.setKeys(keys).catch((e) => showToast(String(e))) });
 initToolbar(tools);
 initHelp(tools, info);
+const relabel = () => { relabelToolbar(); renderHelp(); renderGlobals(); renderKeys(); };
+initGlobalsSettings(info, { changed: relabel });
 initKeysSettings();
-const relabel = () => { relabelToolbar(); renderHelp(); renderKeys(); };
 onShortcutsChange(relabel);
 // Пройти обучение — отмечаем сразу, и при пропуске тоже: показывать его снова решает человек.
 initOnboarding(info, { done: () => { info.onboarded = true; api.setOnboarded(true).catch((e) => showToast(String(e))); } });

@@ -2,7 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { comboFromEvent, resolve, toOverrides, assign, lookup, digitRun } from '../src/core/keymap.js';
+import { comboFromEvent, resolve, toOverrides, assign, lookup, digitRun, toAccelerator } from '../src/core/keymap.js';
 
 const key = (code, mods = {}) => ({ code, ctrlKey: false, metaKey: false, altKey: false, shiftKey: false, ...mods });
 
@@ -39,4 +39,14 @@ test('клавиши: ряд цифр в памятке одной строко�
   assert.equal(digitRun(['Alt+Digit1', 'Shift+Digit2']), null);
   assert.equal(digitRun(['Alt+Digit1', 'Alt+KeyQ']), null);
   assert.equal(digitRun(['Alt+Digit1']), null);
+});
+
+test('клавиши: глобальный хоткей — с модификатором и клавишей для любой раскладки', () => {
+  assert.equal(toAccelerator('Alt+Backquote'), 'Alt+Backquote');
+  assert.equal(toAccelerator('Mod+Shift+KeyD'), 'CommandOrControl+Shift+D');
+  assert.equal(toAccelerator('Ctrl+Alt+Digit5'), 'Control+Alt+5');
+  assert.equal(toAccelerator('Alt+F9'), 'Alt+F9');
+  assert.equal(toAccelerator('KeyD'), null, 'без модификатора перехватил бы обычный ввод');
+  assert.equal(toAccelerator('Mod+Alt+Shift+KeyD'), null, 'больше трёх клавиш');
+  assert.equal(toAccelerator('Alt+BracketLeft'), null, 'клавиша зависит от раскладки');
 });

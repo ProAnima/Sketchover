@@ -35,18 +35,12 @@
         <label for="lang" data-i18n="settings.language"></label>
         <select id="lang"></select>
       </div>
-      <div class="row">
-        <span data-i18n="settings.hotkey"></span>
-        <button id="hotkey" class="field"></button>
-      </div>
-      <p id="hotkey-error" class="error" hidden></p>
-      <div class="row" id="tap-row">
-        <label for="tap-key" data-i18n="settings.tap"></label>
-        <select id="tap-key"></select>
-      </div>
       <details id="keys">
         <summary data-i18n="settings.keys"></summary>
         <p id="keys-note" class="error" hidden></p>
+        <h4 class="keys-heading" data-i18n="keys.global"></h4>
+        <div id="global-list"></div>
+        <div id="modifier-list"></div>
         <div id="keys-list"></div>
         <button id="keys-reset" class="text" data-i18n="keys.reset"></button>
       </details>

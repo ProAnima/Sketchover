@@ -1,5 +1,5 @@
-//! Окно-оверлей: показ на мониторе с курсором, сквозные клики (режим, удержание Alt,
-//! двойной тап выбранной клавиши) с кликабельной панелью.
+//! Окно-оверлей: показ на мониторе с курсором, сквозные клики (режим, удержание и двойной
+//! тап выбранных клавиш) с кликабельной панелью.
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Mutex, MutexGuard, OnceLock};
@@ -41,7 +41,6 @@ impl Rect {
     }
 }
 
-#[derive(Default)]
 struct State {
     /// Зажат Alt — временно сквозные клики.
     peeking: bool,
@@ -50,13 +49,30 @@ struct State {
     panel: Rect,
     /// Что сейчас выставлено окну; `None` — неизвестно, выставить заново.
     ignoring: Option<bool>,
-    /// Клавиша двойного тапа (из настроек).
-    tap: keys::Tap,
+    /// Клавиши удержания и двойного тапа (из настроек).
+    hold: keys::Modifier,
+    tap: keys::Modifier,
     /// Когда её зажали и нажималось ли вместе с ней что-то ещё (тогда это комбинация, не тап).
     tap_since: Option<Instant>,
     tap_combo: bool,
     /// Когда закончился предыдущий тап.
     last_tap: Option<Instant>,
+}
+
+impl Default for State {
+    fn default() -> Self {
+        Self {
+            peeking: false,
+            pass: false,
+            panel: Rect::default(),
+            ignoring: None,
+            hold: keys::Modifier::HOLD_DEFAULT,
+            tap: keys::Modifier::TAP_DEFAULT,
+            tap_since: None,
+            tap_combo: false,
+            last_tap: None,
+        }
+    }
 }
 
 impl State {
@@ -105,11 +121,15 @@ impl ClickThrough {
         self.state.lock().unwrap_or_else(|e| e.into_inner())
     }
 
-    pub fn set_tap(&self, tap: keys::Tap) {
+    pub fn set_tap(&self, tap: keys::Modifier) {
         let mut s = self.lock();
         s.tap = tap;
         s.tap_since = None;
         s.last_tap = None;
+    }
+
+    pub fn set_hold(&self, hold: keys::Modifier) {
+        self.lock().hold = hold;
     }
 
     pub fn set_pass(&self, app: &AppHandle, pass: bool, panel: Rect) {
@@ -142,7 +162,7 @@ fn request_sync(app: &AppHandle) {
     let _ = app.run_on_main_thread(move || sync(&handle));
 }
 
-/// Только в главном потоке: сверяет удержание Alt, двойной тап и курсор и выставляет окну, пропускать ли мышь.
+/// Только в главном потоке: сверяет удержание, двойной тап и курсор и выставляет окну, пропускать ли мышь.
 fn sync(app: &AppHandle) {
     let Some(win) = app.get_webview_window(LABEL) else {
         return;
@@ -151,11 +171,13 @@ fn sync(app: &AppHandle) {
     let visible = clicks.visible.load(Ordering::Relaxed);
     let mut s = clicks.lock();
 
-    let k = keys::poll(s.tap).filter(|_| visible).unwrap_or(keys::Keys {
-        hold: false,
-        tap: false,
-        other: false,
-    });
+    let k = keys::poll(s.hold, s.tap)
+        .filter(|_| visible)
+        .unwrap_or(keys::Keys {
+            hold: false,
+            tap: false,
+            other: false,
+        });
     if s.track_taps(k, Instant::now()) {
         // Двойной тап: рисование ⇄ сквозные клики — как глобальный хоткей.
         let _ = app.emit("overlay:toggle", ());
@@ -164,7 +186,7 @@ fn sync(app: &AppHandle) {
     if held != s.peeking {
         s.peeking = held;
         let _ = app.emit("overlay:peek", held);
-        // Пока Alt был зажат, клик мог увести фокус — возвращаем его холсту, чтобы работали клавиши.
+        // Пока клавиша удержания была зажата, клик мог увести фокус — возвращаем его холсту.
         if !held && !s.pass {
             focus(&win);
         }
@@ -278,14 +300,32 @@ pub fn hide(app: &AppHandle) {
     let _ = win.hide();
 }
 
-/// Глобальный хоткей: спрятан → показать; виден → рисование ⇄ сквозные клики (решает интерфейс).
-pub fn on_hotkey(app: &AppHandle) {
-    let visible = app
-        .get_webview_window(LABEL)
+fn is_visible(app: &AppHandle) -> bool {
+    app.get_webview_window(LABEL)
         .and_then(|w| w.is_visible().ok())
-        .unwrap_or(false);
-    if visible {
+        .unwrap_or(false)
+}
+
+/// Главный глобальный хоткей: спрятан → показать; виден → рисование ⇄ сквозные клики (решает интерфейс).
+pub fn on_hotkey(app: &AppHandle) {
+    if is_visible(app) {
         let _ = app.emit("overlay:toggle", ());
+    } else {
+        show(app);
+    }
+}
+
+/// Хоткей режима: только переключает, спрятанный холст не показывает.
+pub fn toggle_mode(app: &AppHandle) {
+    if is_visible(app) {
+        let _ = app.emit("overlay:toggle", ());
+    }
+}
+
+/// Хоткей «показать / спрятать».
+pub fn toggle_visible(app: &AppHandle) {
+    if is_visible(app) {
+        hide(app);
     } else {
         show(app);
     }

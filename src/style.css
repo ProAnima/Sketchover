@@ -33,7 +33,7 @@ body.mode-pass #mode { background: rgba(52, 199, 89, .85); }
 #settings-toggle.has-update::after { content: ""; position: absolute; width: 7px; height: 7px; margin: -14px -14px 0 0; border-radius: 50%; background: #34c759; }
 
 /* Со списком клавиш панель бывает выше экрана — прокручивается сама. */
-#settings { width: 340px; padding: 12px 14px; font-size: 13px; display: flex; flex-direction: column; gap: 8px; max-height: calc(100vh - 90px); overflow-y: auto; }
+#settings { width: min(380px, calc(100vw - 24px)); padding: 12px 14px; font-size: 13px; display: flex; flex-direction: column; gap: 8px; max-height: calc(100vh - 90px); overflow-y: auto; }
 #settings[hidden] { display: none; }
 #settings h3 { margin: 6px 0 0; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; opacity: .55; }
 #settings .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 28px; }
@@ -54,8 +54,13 @@ body.mode-pass #mode { background: rgba(52, 199, 89, .85); }
 #settings .selectable { user-select: text; }
 #keys summary { cursor: pointer; min-height: 28px; display: flex; align-items: center; }
 #keys h4 { margin: 10px 0 2px; font-size: 11px; font-weight: 600; opacity: .55; }
+#keys h4.keys-heading { margin-top: 14px; font-size: 12px; opacity: .85; text-transform: uppercase; letter-spacing: .05em; }
+#modifier-list[hidden] { display: none; }
+/* Сочетание сохранено, но его держит другая программа. */
+#settings button.field.key.warn { outline: 2px solid #ff9f0a; }
 #settings .key-row { min-height: 26px; }
-#settings .key-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+/* Подпись переносится, а не обрезается: «Удерживать — мышь окнам под холстом» должна читаться целиком. */
+#settings .key-label { flex: 1; min-width: 0; line-height: 1.25; display: flex; align-items: center; gap: 6px; }
 .key-swatch { width: 12px; height: 12px; border-radius: 50%; flex: none; }
 #settings button.field.key { min-width: 110px; height: 26px; }
 #settings button.key-reset { padding: 0 4px; opacity: .7; }

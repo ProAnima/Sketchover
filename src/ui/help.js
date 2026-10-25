@@ -1,6 +1,6 @@
 // Памятка по клавишам сбоку экрана. Открыта по умолчанию, F1 или «?» — свернуть/развернуть.
 import { t } from '../i18n/index.js';
-import { formatKeys, formatCombo, formatTap } from './keys.js';
+import { formatKeys, formatCombo, formatModifierKey } from './keys.js';
 import { toolIcon } from './icons.js';
 import { combosOf, firstKeyText as firstKey, groupKeysText as groupKeys } from './shortcuts.js';
 
@@ -29,9 +29,15 @@ const pair = (a, b) => `${firstKey(a)} · ${firstKey(b)}`;
 export function renderHelp() {
   aside.replaceChildren(el('h3', null, t('help.title')));
   aside.append(row(formatKeys(info.hotkey), t('help.toggle')));
-  if (info.holdSupported) aside.append(row(`${formatKeys('Alt')} (${t('help.hold')})`, t('help.peek')));
-  const tap = info.holdSupported && info.tapKey !== 'off' ? formatTap(info.tapKey) : null;
+  const hold = info.holdSupported && info.holdKey !== 'off' ? formatModifierKey(info.holdKey) : null;
+  if (hold) aside.append(row(`${hold} (${t('help.hold')})`, t('help.peek')));
+  const tap = info.holdSupported && info.tapKey !== 'off' ? formatModifierKey(info.tapKey) : null;
   aside.append(row(tap ? `${firstKey('pass')} · ${tap} ${tap}` : firstKey('pass'), t('help.pass')));
+  // Необязательные глобальные хоткеи — только если назначены.
+  for (const [action, label] of [['mode', 'keys.globalMode'], ['hide', 'keys.globalHide']]) {
+    const accelerator = info.globals?.[action]?.accelerator;
+    if (accelerator) aside.append(row(formatKeys(accelerator), t(label)));
+  }
 
   aside.append(el('h4', null, t('help.tools')));
   const grid = el('div', 'help-tools');
