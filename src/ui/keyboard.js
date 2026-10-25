@@ -12,7 +12,10 @@ import { isMac } from './keys.js';
 
 // Что делает каждое действие реестра (shortcuts.js); клавиши к ним назначает человек.
 const RUN = {
-  pass: () => { if (state.sel != null) { state.sel = null; render(); } else setMode('pass'); },
+  // Esc — шаг назад: снять выделение, убрать доску, и только потом — сквозной режим.
+  pass: () => {
+    if (state.sel != null) { state.sel = null; render(); } else if (state.board) toggleBoard(state.board); else setMode('pass');
+  },
   help: toggleHelp,
   shot: takeScreenshot,
   fade: toggleFade,

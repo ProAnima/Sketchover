@@ -55,6 +55,7 @@ function stepText(id) {
     fade: firstKeyText('fade'),
     white: firstKeyText('board.white'),
     black: firstKeyText('board.black'),
+    esc: firstKeyText('pass'),
     colors: groupKeysText('colors'),
     widths: groupKeysText('widths'),
     shot: firstKeyText('shot'),

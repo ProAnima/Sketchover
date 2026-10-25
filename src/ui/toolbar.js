@@ -10,7 +10,8 @@ import { undo, redo, clearAll } from './actions.js';
 import { toolIcon } from './icons.js';
 import { takeScreenshot } from './screenshot.js';
 import { copyImage, saveScene, openScene } from './export.js';
-import { keysText, labelOf } from './shortcuts.js';
+import { keysText, labelOf, firstKeyText } from './shortcuts.js';
+import { showToast, hideToast } from './toast.js';
 
 const COPY = 'M8 3h9a2 2 0 0 1 2 2v11h-2V5H8zM5 7h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 2v10h9V9z';
 const SAVE = 'M5 3h11l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm2 2v4h8V5zm5 8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z';
@@ -63,6 +64,8 @@ export function toggleFade() {
   state.fade = !state.fade;
   try { localStorage.setItem(FADE_KEY, state.fade ? '1' : '0'); } catch { /* без памяти — не страшно */ }
   refreshToolbar();
+  // Включили клавишей случайно — без подсказки непонятно, почему рисунки пропадают.
+  showToast(state.fade ? t('toast.fadeOn', { key: firstKeyText('fade') }) : t('toast.fadeOff'));
 }
 
 /** Доска нужного цвета; та же ещё раз — убрать. Видна только в режиме рисования. */
@@ -71,6 +74,13 @@ export function toggleBoard(kind) {
   if (state.board && state.mode !== 'draw') setMode('draw');
   refreshToolbar();
   render();
+  // Доска закрывает экран целиком — сразу сказать, как вернуть его.
+  if (state.board) {
+    const board = t(state.board === 'white' ? 'toolbar.boardWhite' : 'toolbar.boardBlack');
+    showToast(t('toast.board', { board, key: firstKeyText(`board.${state.board}`), esc: firstKeyText('pass') }));
+  } else {
+    hideToast(); // подсказка «как убрать доску» больше не нужна
+  }
 }
 
 // Кнопка доски по кругу: нет → белая → тёмная → нет.

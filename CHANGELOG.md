@@ -4,6 +4,12 @@ All notable changes to Sketchover. The release workflow takes the notes for each
 
 ## [0.5.0]
 
+### Changed
+- `Esc` steps back: it deselects, then removes the board, and only then switches to click-through.
+- Short hints say what just happened and how to undo it: after clearing the canvas, when fading ink is turned on or off, and when a board covers the screen.
+- The toolbar now fits in two even rows on laptop screens (1024–1366 px) instead of three, and the cheat sheet hides while Settings is open.
+- The near-black color is outlined, so it is visible on the dark toolbar; the *Keys* section shows that it expands.
+
 ### Added
 - Highlighter (`M`): a wide, see-through stroke to mark a line of text without hiding it.
 - Fading ink (`F`): lines, arrows and shapes fade away by themselves after a couple of seconds — point things out without cleaning up. Text, blocks and screenshots stay; faded ink is not in undo or in saved files.

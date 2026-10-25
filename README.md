@@ -70,12 +70,13 @@ On the first launch a short tour highlights the toolbar step by step and explain
 | Tools | `1` select, `2` brush, `M` highlighter, `3` line, `4` arrow, `5` rectangle, `6` ellipse, `7` text block, `8` text, `9` laser, `0` eraser |
 | Region screenshot | `S` |
 | Fading ink on / off | `F` |
-| White / dark board on / off | `W` / `K` |
+| White / dark board on / off | `W` / `K` (or `Esc`) |
+| Step back | `Esc`: deselect, then remove the board, then click-through |
 | Color / stroke width | `Alt+1…8` / `Shift+1…3` |
 | Undo / redo | `Ctrl+Z` / `Ctrl+Y` |
 | Copy the drawing as an image | `Ctrl+Shift+C` |
 | Save / open (PNG with the editable canvas inside) | `Ctrl+S` / `Ctrl+O` |
-| Delete selected / clear all | `Delete` / `Shift+Delete` |
+| Delete selected / clear all | `Delete` / `Shift+Delete` (`Ctrl+Z` brings it back) |
 | Edit a text block | double-click it with any tool |
 
 These are the defaults; every one of them can be changed in Settings (⚙) → **Keys**, and Sketchover remembers your choice:
