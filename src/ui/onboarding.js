@@ -124,7 +124,6 @@ function render() {
   const step = STEPS[index];
   const first = index === 0;
   const last = index === STEPS.length - 1;
-  const spot = root.querySelector('.tour-spot');
   const card = root.querySelector('.tour-card');
 
   const actions = el('div', 'tour-actions');
@@ -145,10 +144,16 @@ function render() {
   void card.offsetWidth;
   card.classList.add('show');
 
-  const rect = targetRect(step.target);
-  placeSpot(spot, rect);
-  placeCard(card, rect);
+  place();
   next.focus();
+}
+
+// Рамка и карточка — по текущему положению панели. При изменении размера окна только это:
+// без повторной анимации и без перехвата фокуса.
+function place() {
+  const rect = targetRect(STEPS[index].target);
+  placeSpot(root.querySelector('.tour-spot'), rect);
+  placeCard(root.querySelector('.tour-card'), rect);
 }
 
 function go(i) {
@@ -168,9 +173,7 @@ function onKey(e) {
   if (e.key === 'ArrowLeft') { e.preventDefault(); go(index - 1); }
 }
 
-const onResize = () => render();
-
-export const isTourActive = () => root !== null;
+const onResize = () => place();
 
 export function startTour() {
   if (root) return;
