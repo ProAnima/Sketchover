@@ -2,6 +2,20 @@
 
 All notable changes to Sketchover. The release workflow takes the notes for each version from this file.
 
+## [0.5.1]
+
+### Fixed
+- Text and block editing: the text field no longer closes empty right after a click, and a double-click opens a block with the cursor at the end instead of selecting all of its text.
+- After typing a text or a block, `Delete`, a new color or `Esc` no longer act on an invisible selection.
+- Selecting an arrow between blocks no longer detaches it from a tiny hand tremor; a click with the arrow tool inside a block leaves no stray mark.
+- The laser dot stays visible while the button is held still.
+- A stroke no longer keeps drawing after the mouse button was released outside the canvas; a second touch does not interrupt a gesture.
+- The highlighter's selection frame sits outside its wide stroke; picking a color with a screenshot selected adds no empty undo step.
+- Undo hides the "canvas cleared" hint; a failed screenshot frees its memory.
+- Opening a damaged file no longer yields shapes that cannot be selected or erased.
+- Arabic: keys read left to right and the *Keys* arrow points the right way.
+- Translations proofread in all languages.
+
 ## [0.5.0]
 
 ### Changed
