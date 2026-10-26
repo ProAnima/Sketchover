@@ -1,6 +1,6 @@
 import { state, BOARDS } from '../core/state.js';
 import { fadeAlpha } from '../core/fade.js';
-import { selected, isBox, canRotate, bounds, setTextMeasurer, ROTATE_HANDLE_OFFSET } from '../core/shapes.js';
+import { selected, isBox, canRotate, bounds, strokeWidth, setTextMeasurer, ROTATE_HANDLE_OFFSET } from '../core/shapes.js';
 import { drawShape, enterShape } from './shapes-draw.js';
 
 export const canvas = document.querySelector('#board');
@@ -19,7 +19,9 @@ function drawSelection(s) {
   ctx.setLineDash([6, 4]);
   if (!isBox(s)) {
     const b = bounds(s);
-    ctx.strokeRect(b.x - 6, b.y - 6, b.w + 12, b.h + 12);
+    // Рамка — снаружи штриха: широкий маркер иначе она перечёркивала бы.
+    const pad = 6 + (s.type === 'marker' ? strokeWidth(s) / 2 : 0);
+    ctx.strokeRect(b.x - pad, b.y - pad, b.w + pad * 2, b.h + pad * 2);
     ctx.restore();
     return;
   }
@@ -64,8 +66,9 @@ function drawLaser(now) {
     ctx.stroke();
     ctx.restore();
   }
-  if (pts.length && state.laser.active) {
-    const p = pts[pts.length - 1];
+  // Точка — по последнему месту указки: след угасает, а держать указку на месте можно сколько угодно.
+  const p = state.laser.pos;
+  if (state.laser.active && p) {
     ctx.fillStyle = '#ff3b30';
     ctx.beginPath();
     ctx.arc(p.x, p.y, 7, 0, Math.PI * 2);
@@ -96,7 +99,7 @@ function paint() {
   if (sel && state.tool === 'select' && sel !== state.editing) drawSelection(sel);
   const now = performance.now();
   if (state.fading.length) drawFading(now);
-  if (state.laser.points.length) drawLaser(now);
+  if (state.laser.points.length || state.laser.active) drawLaser(now);
   // Пока что-то гаснет — анимируем; в простое кадры не рисуются.
   if (state.fading.length || state.laser.points.length) render();
 }
