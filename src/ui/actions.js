@@ -3,13 +3,15 @@ import { commit, undo as undoHistory, redo as redoHistory } from '../core/histor
 import { removeShape, selected } from '../core/shapes.js';
 import { finishEdit } from './editor.js';
 import { render } from './canvas.js';
-import { showToast } from './toast.js';
+import { showToast, hideToast } from './toast.js';
 import { firstKeyText } from './shortcuts.js';
 import { t } from '../i18n/index.js';
 
 export function undo() {
   finishEdit();
-  if (undoHistory()) render();
+  if (!undoHistory()) return;
+  hideToast(); // «Холст очищен — Ctrl+Z, чтобы вернуть» больше не к месту
+  render();
 }
 
 export function redo() {

@@ -2,6 +2,9 @@ import { state } from '../core/state.js';
 import { handles, move, rotatePoint, selected, toWorld, topmostAt } from '../core/shapes.js';
 
 const HANDLE_RADIUS = 10;
+// Сдвиг меньше этого — не перетаскивание, а дрожь руки при клике: стрелка между блоками
+// иначе отцеплялась бы от них от одного выделения.
+const MOVE_THRESHOLD = 3;
 const near = (p, x, y) => p && Math.hypot(x - p.x, y - p.y) < HANDLE_RADIUS;
 
 export function createSelectTool(meta, host) {
@@ -43,13 +46,15 @@ export function createSelectTool(meta, host) {
       if (!drag) {
         const s = topmostAt(x, y);
         state.sel = s ? s.id : null;
-        drag = s ? { kind: 'move', shape: s, x, y } : null;
+        drag = s ? { kind: 'move', shape: s, x, y, moving: false } : null;
       }
       host.render();
     },
     move(x, y) {
       if (!drag) return;
       if (drag.kind === 'move') {
+        if (!drag.moving && Math.hypot(x - drag.x, y - drag.y) < MOVE_THRESHOLD) return;
+        drag.moving = true;
         move(drag.shape, x - drag.x, y - drag.y);
         drag.x = x;
         drag.y = y;

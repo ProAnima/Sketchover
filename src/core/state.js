@@ -13,7 +13,7 @@ export const state = {
   shapes: [],
   sel: null, // id выбранной фигуры
   editing: null, // фигура, чей текст сейчас правится
-  laser: { points: [], active: false },
+  laser: { points: [], active: false, pos: null },
   board: null, // null | 'white' | 'black'
   fade: false, // исчезающие рисунки
   fading: [], // [{ shape, since }] — угасают, в историю и файл не попадают

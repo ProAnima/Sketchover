@@ -53,7 +53,8 @@ export function editText(s) {
   ready.finally(() => {
     if (state.editing !== s) return;
     editor.focus();
-    editor.select();
+    // Курсор — в конец: выделить всё значило бы стереть текст первым же нажатием.
+    editor.setSelectionRange(editor.value.length, editor.value.length);
   });
   render();
 }
@@ -65,6 +66,9 @@ export function finishEdit() {
   s.text = editor.value.replace(/\s+$/, ''); // хвост пустых строк от завершения списка не нужен
   editor.hidden = true;
   if (s.type === 'text' && !s.text.trim()) removeShape(s);
+  // Выделение видно только у инструмента «Выбор». Невидимое оставлять нельзя: Delete удалил бы
+  // только что набранный блок, цвет следующего блока перекрасил бы его, а Esc «не срабатывал».
+  if (state.tool !== 'select') state.sel = null;
   if (s.type === 'node') {
     // Блок растёт под текст (заголовки, списки), но не сжимается.
     const t = textSize(s);
