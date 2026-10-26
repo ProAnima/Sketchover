@@ -1,5 +1,5 @@
 import { state, NODE_SIZE } from '../core/state.js';
-import { createShape, isLine, isStroke, attachAt, removeShape, topmostAt } from '../core/shapes.js';
+import { createShape, isLine, isStroke, attachAt, removeShape, topmostAt, getShape, hit } from '../core/shapes.js';
 
 // Инструмент «протяни фигуру»: кисть, маркер, линия, стрелка, прямоугольник, эллипс, нода.
 export function createShapeTool(meta, host) {
@@ -8,9 +8,13 @@ export function createShapeTool(meta, host) {
   function finish(s, x, y) {
     if (isLine(s)) {
       s.to = attachAt(x, y)?.id ?? null;
-      if (s.to === s.from && Math.hypot(s.x2 - s.x1, s.y2 - s.y1) < 20) s.to = null;
-      const tiny = !s.to && !s.from && Math.hypot(s.x2 - s.x1, s.y2 - s.y1) < 4;
-      if (tiny) removeShape(s);
+      // Начало и конец в одном блоке — не связь: стрелка схлопнулась бы в его центр.
+      if (s.to === s.from) s.to = null;
+      const from = s.from != null ? getShape(s.from) : null;
+      // Клик стрелкой (или короткий штрих внутри блока либо скриншота) — не стрелка:
+      // иначе внутри осталась бы чёрточка или одинокий наконечник.
+      const junk = !s.to && (Math.hypot(s.x2 - s.x1, s.y2 - s.y1) < 4 || (from && hit(from, s.x2, s.y2)));
+      if (junk) removeShape(s);
     } else if (s.type === 'node') {
       if (s.w < 10 || s.h < 10) Object.assign(s, { x: s.x - NODE_SIZE.w / 2, y: s.y - NODE_SIZE.h / 2, ...NODE_SIZE });
       host.edit(s); // commit произойдёт по завершении правки

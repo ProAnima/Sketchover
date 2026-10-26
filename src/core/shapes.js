@@ -199,6 +199,7 @@ export function bounds(s) {
 }
 
 export function move(s, dx, dy) {
+  if (dx === 0 && dy === 0) return; // линия без сдвига не должна отцепляться от блоков
   if (isStroke(s)) s.points.forEach((p) => { p.x += dx; p.y += dy; });
   else if (isLine(s)) {
     // Перемещённая линия отцепляется от нод, иначе она бы «вернулась» к ним.
