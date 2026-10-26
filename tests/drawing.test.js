@@ -43,3 +43,32 @@ test('маркер: сохраняется в файл и читается об�
   const broken = unpackScene(packScene([{ ...m, points: [] }], {}));
   assert.deepEqual(broken.shapes, [], 'маркер без точек отбрасывается');
 });
+
+test('файл: фигуры без размера, повторные id и чужой поворот не проходят', () => {
+  const rect = (id, extra = {}) => ({ id, type: 'rect', color: '#ff3b30', width: 3, x: 0, y: 0, w: 10, h: 10, ...extra });
+  const node = { id: 9, type: 'node', color: '#ff3b30', width: 3, x: 0, y: 0, w: 150, h: 56, size: 9999, text: 'a', rotation: 1 };
+  const scene = unpackScene(packScene([rect(1), rect(2, { w: -5 }), rect(1), node], {}));
+  assert.deepEqual(scene.shapes.map((s) => s.id), [1, 9], 'без размера и повторный id отброшены');
+  assert.equal(scene.shapes[1].rotation, undefined, 'поворот только у скриншота');
+  assert.equal(scene.shapes[1].size, 400, 'размер текста ограничен');
+});
+
+test('история: отменённое случайное не возвращается повтором', async () => {
+  const { state } = await import('../src/core/state.js');
+  const { commit, undo, redo, clearRedo } = await import('../src/core/history.js');
+  state.shapes = [];
+  commit();
+  state.shapes = [{ id: 1, type: 'pen' }];
+  commit();
+  assert.ok(undo());
+  clearRedo();
+  assert.equal(redo(), false);
+  assert.deepEqual(state.shapes, []);
+});
+
+test('перемещение на ноль не отцепляет линию от блоков', () => {
+  const line = createShape('arrow', 0, 0);
+  Object.assign(line, { x2: 50, y2: 0, from: 1, to: 2 });
+  move(line, 0, 0);
+  assert.deepEqual([line.from, line.to], [1, 2]);
+});

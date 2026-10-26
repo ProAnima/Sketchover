@@ -19,6 +19,10 @@ const FIELDS = {
 };
 
 const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
+// Фигуры с рамкой: без положительного размера их не выделить и не стереть.
+const BOXED = new Set(['rect', 'ellipse', 'node', 'image']);
+const MIN_SIZE = 6;
+const MAX_SIZE = 400;
 const isColor = (v) => typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v);
 
 export function packScene(shapes, images) {
@@ -29,6 +33,7 @@ function validShape(s) {
   if (!s || typeof s !== 'object' || !TYPES.has(s.type)) return false;
   if (!Number.isSafeInteger(s.id) || s.id <= 0 || !isColor(s.color) || !isNum(s.width)) return false;
   if (!FIELDS[s.type].every((f) => isNum(s[f]))) return false;
+  if (BOXED.has(s.type) && !(s.w > 0 && s.h > 0)) return false;
   if (s.type === 'pen' || s.type === 'marker') return Array.isArray(s.points) && s.points.length > 0 && s.points.every((p) => isNum(p?.x) && isNum(p?.y));
   if (s.type === 'node' || s.type === 'text') return typeof s.text === 'string';
   if (s.type === 'image') return typeof s.imageId === 'string' && (s.rotation === undefined || isNum(s.rotation));
@@ -46,8 +51,16 @@ export function unpackScene(json) {
   }
   if (data?.app !== SCENE_KEY || !Array.isArray(data.shapes)) return null;
   const images = data.images && typeof data.images === 'object' ? data.images : {};
+  const seen = new Set();
   const shapes = data.shapes.filter(validShape)
-    .filter((s) => s.type !== 'image' || typeof images[s.imageId] === 'string');
+    .filter((s) => s.type !== 'image' || typeof images[s.imageId] === 'string')
+    // Два одинаковых id — выделение одной фигуры двигало бы другую.
+    .filter((s) => !seen.has(s.id) && seen.add(s.id));
+  for (const s of shapes) {
+    // Поворот есть только у скриншота: у остальных рамка выделения повернулась бы отдельно от фигуры.
+    if (s.type !== 'image') delete s.rotation;
+    if (isNum(s.size)) s.size = Math.min(MAX_SIZE, Math.max(MIN_SIZE, s.size));
+  }
   // Ссылки стрелок — только на фигуры, которые остались.
   const ids = new Set(shapes.map((s) => s.id));
   for (const s of shapes) {
