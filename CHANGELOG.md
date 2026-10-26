@@ -4,17 +4,39 @@ All notable changes to Sketchover. The release workflow takes the notes for each
 
 ## [0.5.1]
 
+A polish release: every tool was re-tested by driving the real app, the interface was checked in all 11 languages on laptop and desktop screens, and every translation was proofread. No new features — just fewer surprises.
+
 ### Fixed
-- Text and block editing: the text field no longer closes empty right after a click, and a double-click opens a block with the cursor at the end instead of selecting all of its text.
-- After typing a text or a block, `Delete`, a new color or `Esc` no longer act on an invisible selection.
-- Selecting an arrow between blocks no longer detaches it from a tiny hand tremor; a click with the arrow tool inside a block leaves no stray mark.
-- The laser dot stays visible while the button is held still.
-- A stroke no longer keeps drawing after the mouse button was released outside the canvas; a second touch does not interrupt a gesture.
-- The highlighter's selection frame sits outside its wide stroke; picking a color with a screenshot selected adds no empty undo step.
-- Undo hides the "canvas cleared" hint; a failed screenshot frees its memory.
-- Opening a damaged file no longer yields shapes that cannot be selected or erased.
-- Arabic: keys read left to right and the *Keys* arrow points the right way.
-- Translations proofread in all languages.
+
+**Text and blocks**
+- The text tool works on the first click again: the text field no longer closes empty right after it opens.
+- Double-clicking a text or a block to edit it puts the cursor at the end instead of selecting the whole text, so one keystroke no longer wipes it.
+- After you finish typing, nothing stays secretly selected: `Delete`, a new color or `Esc` no longer act on the block you just wrote.
+
+**Arrows and selection**
+- Clicking an arrow that connects two blocks no longer detaches it: a tiny hand tremor is not a drag any more (moving starts after 3 px).
+- A click with the arrow tool inside a block or a screenshot no longer leaves a stray dash or a lone arrowhead.
+- An arrow that starts and ends in the same block is no longer glued to its center.
+
+**Drawing and pointer**
+- A stroke ends when the mouse button is released outside the canvas — for example after holding the hold key mid-stroke — instead of drawing on without a pressed button.
+- On touch screens and pens, a second finger no longer interrupts the stroke you are drawing.
+- The accidental dot removed after a double-click can no longer come back with redo.
+
+**Laser, highlighter, screenshots**
+- The laser dot stays visible while you hold the button still, not only while moving.
+- The highlighter's selection frame is drawn outside its wide stroke instead of crossing it.
+- Picking a color or width while a screenshot is selected no longer adds empty undo steps.
+- A failed region screenshot frees its memory right away (a 4K frame is tens of megabytes).
+
+**Undo and files**
+- Undo hides the "Canvas cleared — press Ctrl+Z to bring it back" hint once it is no longer relevant.
+- Opening a damaged or hand-edited file no longer creates shapes that cannot be selected or erased: zero-size boxes and duplicate ids are dropped, stray rotation is ignored and text size is kept within limits.
+
+**Languages and layout**
+- Arabic (right-to-left): key combinations read left to right (``Alt + ` ``, not the other way round), and the *Keys* section arrow points the right way.
+- All 10 translations were proofread for consistent terms and natural wording: one word for the canvas, the board and the system tray in each language, polite forms in Japanese and Korean, French narrow no-break spaces before `:`, `?` and `!` so punctuation never wraps onto its own line, and more.
+- The toolbar, Settings, the cheat sheet and every tour step were checked at 1024 and 1280 px in all 11 languages: no clipped or overlapping text.
 
 ## [0.5.0]
 
