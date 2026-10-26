@@ -1,5 +1,5 @@
 import { state } from '../core/state.js';
-import { commit, undo, version } from '../core/history.js';
+import { commit, undo, version, clearRedo } from '../core/history.js';
 import { getShape, topmostAt } from '../core/shapes.js';
 import { splitFading } from '../core/fade.js';
 import { canvas, render } from './canvas.js';
@@ -14,6 +14,7 @@ const DOUBLE_PX = 6;
 export function initPointer(tools) {
   const current = () => tools.find((t) => t.id === state.tool);
   let active = null; // инструмент, получивший pointerdown
+  let pointerId = null; // указатель этого жеста: второе касание (сенсорный экран, перо) не вмешивается
   let lastClick = null; // версии истории до и после предыдущего клика
   let lastDown = null; // время и место предыдущего нажатия
   let before = new Set(); // id фигур до жеста
@@ -35,7 +36,10 @@ export function initPointer(tools) {
     finishEdit();
     // Первый клик мог что-то нарисовать (например, точку кистью) — откатываем это.
     const id = target.id;
-    if (lastClick && lastClick.after !== lastClick.before && version() === lastClick.after) undo();
+    if (lastClick && lastClick.after !== lastClick.before && version() === lastClick.after) {
+      undo();
+      clearRedo(); // случайную точку не должен возвращать и повтор
+    }
     const s = getShape(id); // после отката фигуры — новые объекты, ищем по id
     if (s) editText(s);
     render();
@@ -44,6 +48,15 @@ export function initPointer(tools) {
 
   canvas.addEventListener('pointerdown', (e) => {
     if (state.mode !== 'draw' || e.button !== 0) return;
+    if (active && e.pointerId !== pointerId) return; // второе касание во время жеста
+    if (active) end(e); // тот же указатель — прошлый жест не завершился: закрываем его
+    // Мышь на холсте — наша. Без этого браузер после pointerdown переводит фокус на место
+    // клика, и только что открытое поле ввода (инструмент «Текст», правка двойным кликом)
+    // тут же закрывалось пустым. Фокус с панели и настроек снимаем сами — иначе клавиши
+    // холста уходили бы туда.
+    e.preventDefault();
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+    pointerId = e.pointerId;
     const double = lastDown && e.timeStamp - lastDown.t < DOUBLE_MS
       && Math.hypot(e.clientX - lastDown.x, e.clientY - lastDown.y) < DOUBLE_PX;
     lastDown = double ? null : { t: e.timeStamp, x: e.clientX, y: e.clientY };
@@ -58,11 +71,15 @@ export function initPointer(tools) {
   });
 
   canvas.addEventListener('pointermove', (e) => {
-    if (active) active.move(e.clientX, e.clientY);
+    if (!active || e.pointerId !== pointerId) return;
+    // Кнопку отпустили вне холста (зажали клавишу удержания посреди штриха — окно стало
+    // пропускать мышь): жест закончен, иначе кисть рисовала бы без нажатой кнопки.
+    if (!(e.buttons & 1)) { end(e); return; }
+    active.move(e.clientX, e.clientY);
   });
 
-  const end = (e) => {
-    if (!active) return;
+  function end(e) {
+    if (!active || e.pointerId !== pointerId) return;
     const tool = active;
     active = null;
     tool.up(e.clientX, e.clientY);
@@ -70,7 +87,7 @@ export function initPointer(tools) {
     if (!state.editing) commit(); // при правке текста commit будет в finishEdit
     if (lastClick) lastClick.after = version();
     render();
-  };
+  }
   canvas.addEventListener('pointerup', end);
   // Жест может прерваться системой (смена фокуса, сенсорный ввод) — завершаем, чтобы инструмент не «залип».
   canvas.addEventListener('pointercancel', end);

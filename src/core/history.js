@@ -37,6 +37,11 @@ export function referencedImageIds() {
   return ids;
 }
 
+/** Повтора нет: отменённое — случайное, его не должен вернуть Ctrl+Y. */
+export function clearRedo() {
+  redoStack.length = 0;
+}
+
 // Возвращают true, если состояние изменилось.
 export function undo() {
   if (!undoStack.length) return false;
