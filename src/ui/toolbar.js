@@ -50,7 +50,8 @@ export function selectTool(id) {
 export function applyStyle(patch) {
   Object.assign(state, patch);
   const s = selected();
-  if (s) {
+  // У скриншота цвета и толщины нет — иначе каждый выбор цвета оставлял бы пустой шаг отмены.
+  if (s && s.type !== 'image') {
     if (patch.color) s.color = patch.color;
     if (patch.width && s.type !== 'text') s.width = patch.width;
     commit();

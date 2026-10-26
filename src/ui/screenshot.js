@@ -32,15 +32,17 @@ export async function takeScreenshot() {
   busy = true;
   finishEdit();
   if (state.mode !== 'draw') setMode('draw');
+  let frame = null;
   try {
-    const frame = await grab();
+    frame = await grab();
     const region = await selectRegion(frame);
     if (region) await place(frame, region);
-    frame.close();
   } catch (e) {
     console.error(e);
     showToast(t('shot.failed'));
   } finally {
+    // Кадр 4K — десятки мегабайт: освобождаем и при ошибке.
+    frame?.close();
     busy = false;
   }
 }
